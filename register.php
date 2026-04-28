@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register - FuelSense</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            background: radial-gradient(circle at top, #0d0d0d, #000);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .register-box {
+            background: rgba(10,10,10,0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #0ff;
+            box-shadow: 0 0 20px #0ff;
+            width: 340px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px;
+            color: #ff00ff;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #ff00ff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff00ff;
+            color: black;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .login {
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .login a {
+            color: #0ff;
+            text-decoration: none;
+        }
+
+        .login a:hover {
+            text-shadow: 0 0 10px #0ff;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="register-box">
+    <h2>⚡ Create Account</h2>
+
+    <form method="POST" action="process_register.php">
+        <label>Name</label>
+        <input type="text" name="name" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="login">
+        <p>Already have an account?</p>
+        <a href="login.php">Login here</a>
+    </div>
+</div>
+
+</body>
+</html>
