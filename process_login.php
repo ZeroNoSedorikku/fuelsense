@@ -1,37 +1,46 @@
 <?php
 session_start();
-$message = "";
 include 'db.php';
 
-$email = $_POST['email'];
-$password = $_POST['password'];
+$message = "";
+$success = false;
 
-$query = "SELECT * FROM users WHERE email = $1";
-$result = pg_query_params($conn, $query, array($email));
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-$user = pg_fetch_assoc($result);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-if ($user) {
+    // Get user safely
+    $query = "SELECT * FROM users WHERE email = $1";
+    $result = pg_query_params($conn, $query, [$email]);
 
-    // DEBUG TEMP (REMOVE AFTER FIX)
-    // var_dump($user); exit();
+    if (pg_num_rows($result) > 0) {
 
-    if ($password === $user['password']) {
+        $user = pg_fetch_assoc($result);
 
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['role'] = $user['role'];
+        if (password_verify($password, $user['password'])) {
 
-        if ($user['role'] == 'admin') {
-            header("Location: admin_dashboard.php");
-        } else {
-            header("Location: dashboard.php");
+    // Store session data
+    $_SESSION['user_id'] = $user['user_id'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['role'] = $user['role'];
+
+    // Redirect based on role
+    if ($user['role'] == 'admin') {
+        header("Location: admin_dashboard.php");
+    } else {
+        header("Location: dashboard.php");
+    }
+    exit();
+
+    } else {
+            $message = "❌ Invalid password!";
         }
-        exit();
+
+    } else {
+        $message = "❌ User not found!";
     }
 }
-
-echo "Incorrect email or password!";
 ?>
 
 <!DOCTYPE html>
