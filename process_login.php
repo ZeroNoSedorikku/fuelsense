@@ -1,5 +1,6 @@
 <?php
 session_start();
+$message = "";
 include 'db.php';
 
 $email = $_POST['email'];
