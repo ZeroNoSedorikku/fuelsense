@@ -19,9 +19,31 @@ if ($_SESSION['role'] !== 'admin') {
 <head>
     <title>Admin Dashboard - FuelSense</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        @media (max-width: 600px) {
+
+        h2 {
+            font-size: 18px;
+        }
+
+        .card {
+            width: 100%;
+        }
+
+        .header h2 {
+            font-size: 18px;
+        }
+
+        .logout {
+            top: 5px;
+            right: 5px;
+        }
+
+    }
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -51,30 +73,31 @@ if ($_SESSION['role'] !== 'admin') {
 
         .card {
             background: rgba(10,10,10,0.9);
-            padding: 25px;
+            border: 1px solid #ff00ff;
             border-radius: 15px;
-            border: 1px solid red;
-            box-shadow: 0 0 15px red;
-            width: 260px;
+            padding: 20px;
+            width: 90%;
+            max-width: 300px;
             text-align: center;
+            box-shadow: 0 0 15px #ff00ff;
         }
 
         .card h3 {
-            color: red;
+            color: #ff00ff;
         }
 
         .card a {
             display: block;
-            padding: 10px;
             margin: 10px 0;
-            border: 1px solid red;
-            color: white;
-            text-decoration: none;
+            padding: 8px;
+            border: 1px solid #0ff;
             border-radius: 8px;
+            color: #0ff;
+            text-decoration: none;
         }
 
         .card a:hover {
-            background: red;
+            background: #0ff;
             color: black;
         }
 

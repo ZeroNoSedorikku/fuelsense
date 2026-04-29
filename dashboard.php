@@ -19,6 +19,26 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        @media (max-width: 600px) {
+
+    h2 {
+        font-size: 18px;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .logout {
+        top: 5px;
+        right: 5px;
+    }
+
+}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -28,7 +48,7 @@ if (!isset($_SESSION['user_id'])) {
 
         .header {
             text-align: center;
-            padding: 20px;
+            padding: 20px 15px 50px;
             background: rgba(0,0,0,0.6);
             border-bottom: 2px solid #0ff;
             box-shadow: 0 0 20px #0ff;
@@ -36,32 +56,22 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         .header h2 {
-            color: #0ff;
-            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
-            margin: 0;
             font-size: 20px;
         }
 
         .header p {
-            color: #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
-            margin-top: 8px;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .logout {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
         }
 
         .logout a {
-            padding: 6px 12px;
-            border: 1px solid #ff00ff;
-            border-radius: 6px;
-            color: white;
-            text-decoration: none;
             font-size: 12px;
+            padding: 6px 10px;
         }
 
         .logout a:hover {
@@ -86,12 +96,14 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         .card {
-            background: rgba(10,10,10,0.85);
+            background: rgba(10,10,10,0.8);
             border: 1px solid #0ff;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
+            width: 100%;
+            max-width: 300px;
             text-align: center;
-            box-shadow: 0 0 15px #0ff;
+            box-shadow: 0 0 10px #0ff;
         }
 
         .card h3 {
@@ -104,14 +116,14 @@ if (!isset($_SESSION['user_id'])) {
         /* ✅ BIGGER BUTTONS FOR PHONE */
         .card a {
             display: block;
-            padding: 12px;
+            padding: 8px;
             margin: 8px 0;
             color: #fff;
             text-decoration: none;
             border: 1px solid #ff00ff;
             border-radius: 8px;
             background: transparent;
-            font-size: 14px;
+            font-size: 13px;
             min-height: 45px;
         }
 

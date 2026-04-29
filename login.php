@@ -3,9 +3,31 @@
 <head>
     <title>Login - FuelSense</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        @media (max-width: 600px) {
+
+    h2 {
+        font-size: 18px;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .logout {
+        top: 5px;
+        right: 5px;
+    }
+
+}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;

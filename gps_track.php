@@ -18,6 +18,26 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        @media (max-width: 600px) {
+
+    h2 {
+        font-size: 18px;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .logout {
+        top: 5px;
+        right: 5px;
+    }
+
+}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -37,7 +57,6 @@ if (!isset($_SESSION['user_id'])) {
             box-shadow: 0 0 20px #0ff;
             width: 90%;
             max-width: 400px;
-            text-align: center;
         }
 
         h2 {
@@ -61,10 +80,8 @@ if (!isset($_SESSION['user_id'])) {
 
         button {
             width: 100%;
-            padding: 12px;
-            margin: 6px 0;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
         }
 
         #start {
