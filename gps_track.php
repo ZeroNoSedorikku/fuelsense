@@ -1,5 +1,11 @@
 <?php
 session_start();
+include 'db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -7,148 +13,118 @@ session_start();
 <head>
     <title>GPS Tracking - FuelSense</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-
     <style>
         body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000);
+            font-family: Arial;
+            background: #111;
             color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .box {
-            background: rgba(10,10,10,0.9);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px #0ff;
-            width: 360px;
             text-align: center;
-        }
-
-        h2 {
-            color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-            margin-bottom: 20px;
+            padding-top: 50px;
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid #ff00ff;
-            color: white;
-            border-radius: 8px;
+            padding: 15px 25px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 15px;
         }
 
-        button:hover {
-            background: #ff00ff;
-            color: black;
-            box-shadow: 0 0 15px #ff00ff;
+        #start {
+            background: #27ae60;
+            color: white;
         }
 
-        #output {
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid #0ff;
-            border-radius: 8px;
-            min-height: 50px;
-            box-shadow: 0 0 10px #0ff inset;
+        #stop {
+            background: #c0392b;
+            color: white;
         }
 
-        .status {
-            margin-top: 10px;
-            font-size: 12px;
-            color: #ff00ff;
+        .box {
+            margin-top: 30px;
+            font-size: 22px;
         }
-
-        .back {
-            margin-top: 20px;
-        }
-
-        .back a {
-            color: #0ff;
-            text-decoration: none;
-            font-size: 12px;
-        }
-
-        .back a:hover {
-            text-shadow: 0 0 10px #0ff;
-        }
-
     </style>
 </head>
 <body>
 
+<h2>🚗 GPS Distance Tracker</h2>
+
+<button id="start">Start Tracking</button>
+<button id="stop">Stop Tracking</button>
+
 <div class="box">
-    <h2>📍 GPS Tracking</h2>
-
-    <button onclick="getLocation()">Start GPS</button>
-
-    <div id="output">Waiting for signal...</div>
-    <div class="status" id="status"></div>
-
-    <div class="back">
-        <a href="dashboard.php">⬅ Back to Dashboard</a>
-    </div>
+    Distance: <span id="distance">0</span> km
 </div>
 
+<form id="saveForm" method="POST" action="save_distance.php">
+    <input type="hidden" name="distance" id="finalDistance">
+    <input type="hidden" name="date" id="date">
+    <input type="hidden" name="mode" value="GPS">
+</form>
+
 <script>
-function getLocation() {
-    document.getElementById("status").innerHTML = "Locating...";
-    
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
-    } else {
-        document.getElementById("output").innerHTML = "GPS not supported";
-    }
+let watchId;
+let lastPosition = null;
+let totalDistance = 0;
+
+function toRad(x) {
+    return x * Math.PI / 180;
 }
 
-function showPosition(position) {
-    let lat = position.coords.latitude;
-    let lon = position.coords.longitude;
+// Haversine Formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
 
-    document.getElementById("output").innerHTML =
-        "Latitude: " + lat + "<br>Longitude: " + lon;
+    const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
 
-    document.getElementById("status").innerHTML = "Signal acquired ✔";
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
 
-    // Send to PHP
-    fetch("save_gps.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "lat=" + lat + "&lon=" + lon
+document.getElementById("start").onclick = function () {
+    totalDistance = 0;
+    lastPosition = null;
+
+    watchId = navigator.geolocation.watchPosition(function(position) {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+
+        if (lastPosition) {
+            let dist = calculateDistance(
+                lastPosition.lat,
+                lastPosition.lon,
+                lat,
+                lon
+            );
+            totalDistance += dist;
+        }
+
+        lastPosition = {lat, lon};
+
+        document.getElementById("distance").innerText = totalDistance.toFixed(2);
+
+    }, function(error) {
+        alert("GPS Error: " + error.message);
+    }, {
+        enableHighAccuracy: true
     });
-}
+};
 
-function showError(error) {
-    let message = "";
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            message = "Permission denied ❌";
-            break;
-        case error.POSITION_UNAVAILABLE:
-            message = "Location unavailable ⚠";
-            break;
-        case error.TIMEOUT:
-            message = "Request timeout ⏳";
-            break;
-        default:
-            message = "Unknown error";
-    }
+document.getElementById("stop").onclick = function () {
+    navigator.geolocation.clearWatch(watchId);
 
-    document.getElementById("status").innerHTML = message;
-}
+    document.getElementById("finalDistance").value = totalDistance.toFixed(2);
+    document.getElementById("date").value = new Date().toISOString().split('T')[0];
+
+    document.getElementById("saveForm").submit();
+};
 </script>
 
 </body>

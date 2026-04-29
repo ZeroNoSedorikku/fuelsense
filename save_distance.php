@@ -2,7 +2,7 @@
 session_start();
 include 'db.php';
 
-// Protect
+// Protect page
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -10,16 +10,26 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Check if POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $date = $_POST['date'];
     $distance = $_POST['distance'];
 
+    // Detect mode
+    if (isset($_POST['mode'])) {
+        $mode = $_POST['mode']; // GPS
+    } else {
+        $mode = "Manual";
+    }
+
+    // Validate
     if (empty($date) || empty($distance)) {
-        echo "All fields required!";
+        echo "All fields are required!";
         exit();
     }
 
+    // Insert safely
     $query = "INSERT INTO distance_logs (user_id, date, distance_km, mode)
               VALUES ($1, $2, $3, $4)";
 
@@ -27,11 +37,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user_id,
         $date,
         $distance,
-        'Manual'
+        $mode
     ]);
 
     if ($result) {
-        header("Location: add_distance.php?success=1");
+        header("Location: view_distance.php");
         exit();
     } else {
         echo "Error saving distance!";
