@@ -40,16 +40,22 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
     <td><?= $row['email'] ?></td>
     <td><?= $row['role'] ?></td>
     <td>
-    <?php if ($row['user_id'] != $_SESSION['user_id']): ?>
-    <a href="delete_user.php?id=<?= $row['user_id'] ?>"
-       onclick="return confirm('Delete this user?')"
-       style="color:red;">
-       Delete
-    </a>
-    <?php else: ?>
-    <span style="color:gray;">You</span>
-    <?php endif; ?>
-    </td><a href="admin_dashboard.php">⬅ Back</a>
+        <?php if ($row['user_id'] != $_SESSION['user_id']): ?>
+            <a href="delete_user.php?id=<?= $row['user_id'] ?>"
+               onclick="return confirm('Delete this user?')">
+               Delete
+            </a>
+        <?php else: ?>
+            <span style="color:gray;">You</span>
+        <?php endif; ?>
+    </td>
+</tr>
+<?php endwhile; ?>
+
+</table>
+
+<br>
+<a href="admin_dashboard.php">⬅ Back</a>
 
 </body>
 </html>
