@@ -20,6 +20,8 @@ $result = pg_query_params(
 <head>
     <title>Distance Logs - FuelSense</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
@@ -44,7 +46,7 @@ $result = pg_query_params(
         }
 
         .container {
-            padding: 30px;
+            padding: 15px;
         }
 
         table {
@@ -56,8 +58,9 @@ $result = pg_query_params(
         }
 
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
+            font-size: 12px;
         }
 
         th {
@@ -128,6 +131,8 @@ $result = pg_query_params(
 
 <div class="container">
 
+<div style="overflow-x:auto;">
+    <table>
 <table>
 <tr>
     <th>Date</th>
@@ -158,7 +163,8 @@ $result = pg_query_params(
 <?php endif; ?>
 
 </table>
-
+    </table>
+</div>
 <div class="back">
     <a href="dashboard.php">⬅ Back to Dashboard</a>
 </div>

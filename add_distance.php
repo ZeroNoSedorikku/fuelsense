@@ -12,6 +12,8 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <title>Add Distance - FuelSense</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
@@ -23,16 +25,17 @@ if (!isset($_SESSION['user_id'])) {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .form-container {
             background: rgba(10,10,10,0.9);
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
             border: 1px solid #0ff;
             box-shadow: 0 0 20px #0ff;
-            width: 320px;
+            width: 90%;
+            max-width: 400px;
         }
 
         h2 {

@@ -13,6 +13,8 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <title>GPS Tracking - FuelSense</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
@@ -24,73 +26,67 @@ if (!isset($_SESSION['user_id'])) {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .tracker-box {
             background: rgba(10,10,10,0.9);
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
             border: 1px solid #0ff;
-            box-shadow: 0 0 25px #0ff;
-            width: 380px;
+            box-shadow: 0 0 20px #0ff;
+            width: 90%;
+            max-width: 400px;
             text-align: center;
         }
 
         h2 {
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
-            margin-bottom: 20px;
+            font-size: 20px;
         }
 
         .distance-box {
             margin: 20px 0;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid #0ff;
             border-radius: 10px;
-            font-size: 24px;
-            box-shadow: 0 0 15px #0ff inset;
+            font-size: 22px;
+            box-shadow: 0 0 10px #0ff inset;
         }
 
         .distance-box span {
             color: #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
         }
 
         button {
             width: 100%;
             padding: 12px;
-            margin: 8px 0;
-            font-size: 14px;
-            border: none;
+            margin: 6px 0;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Orbitron', sans-serif;
         }
 
         #start {
-            background: transparent;
             border: 1px solid #0f0;
             color: #0f0;
+            background: transparent;
         }
 
         #start:hover {
             background: #0f0;
             color: black;
-            box-shadow: 0 0 15px #0f0;
         }
 
         #stop {
-            background: transparent;
             border: 1px solid #ff004c;
             color: #ff004c;
+            background: transparent;
         }
 
         #stop:hover {
             background: #ff004c;
             color: black;
-            box-shadow: 0 0 15px #ff004c;
         }
 
         .status {
@@ -105,20 +101,17 @@ if (!isset($_SESSION['user_id'])) {
 
         .back a {
             display: inline-block;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: 1px solid #0ff;
             border-radius: 8px;
             color: #0ff;
             text-decoration: none;
-            transition: 0.3s;
         }
 
         .back a:hover {
             background: #0ff;
             color: black;
-            box-shadow: 0 0 15px #0ff;
         }
-
     </style>
 </head>
 <body>
@@ -142,12 +135,12 @@ if (!isset($_SESSION['user_id'])) {
     </form>
 
     <div class="back">
-        <a href="dashboard.php">⬅ Back to Dashboard</a>
+        <a href="dashboard.php">⬅ Back</a>
     </div>
 </div>
 
 <script>
-let watchId;
+let watchId = null;
 let lastPosition = null;
 let totalDistance = 0;
 
@@ -161,23 +154,32 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const dLon = toRad(lon2 - lon1);
 
     const a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.sin(dLat/2) ** 2 +
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
+        Math.sin(dLon/2) ** 2;
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
 }
 
 document.getElementById("start").onclick = function () {
+    if (!navigator.geolocation) {
+        alert("GPS not supported on this device.");
+        return;
+    }
+
     totalDistance = 0;
     lastPosition = null;
 
     document.getElementById("status").innerText = "Tracking started...";
 
     watchId = navigator.geolocation.watchPosition(function(position) {
+
         let lat = position.coords.latitude;
         let lon = position.coords.longitude;
+
+        // ignore bad accuracy readings
+        if (position.coords.accuracy > 30) return;
 
         if (lastPosition) {
             let dist = calculateDistance(
@@ -186,7 +188,11 @@ document.getElementById("start").onclick = function () {
                 lat,
                 lon
             );
-            totalDistance += dist;
+
+            // ignore tiny movements (noise)
+            if (dist > 0.01) {
+                totalDistance += dist;
+            }
         }
 
         lastPosition = {lat, lon};
@@ -196,19 +202,26 @@ document.getElementById("start").onclick = function () {
     }, function(error) {
         document.getElementById("status").innerText = "GPS Error: " + error.message;
     }, {
-        enableHighAccuracy: true
+        enableHighAccuracy: true,
+        maximumAge: 0
     });
 };
 
 document.getElementById("stop").onclick = function () {
+    if (watchId === null) {
+        alert("Start tracking first!");
+        return;
+    }
+
     navigator.geolocation.clearWatch(watchId);
 
     document.getElementById("status").innerText = "Tracking stopped ✔";
 
-    document.getElementById("finalDistance").value = totalDistance.toFixed(2);
-    document.getElementById("date").value = new Date().toISOString().split('T')[0];
-
-    document.getElementById("saveForm").submit();
+    if (confirm("Save this distance?")) {
+        document.getElementById("finalDistance").value = totalDistance.toFixed(2);
+        document.getElementById("date").value = new Date().toISOString().split('T')[0];
+        document.getElementById("saveForm").submit();
+    }
 };
 </script>
 

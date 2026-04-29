@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 // MUST check existence first
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     header("Location: login.php");

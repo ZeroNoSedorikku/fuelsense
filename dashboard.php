@@ -12,6 +12,10 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <title>FuelSense Dashboard</title>
 
+    <!-- ✅ MOBILE FIX -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
@@ -24,7 +28,7 @@ if (!isset($_SESSION['user_id'])) {
 
         .header {
             text-align: center;
-            padding: 25px;
+            padding: 20px;
             background: rgba(0,0,0,0.6);
             border-bottom: 2px solid #0ff;
             box-shadow: 0 0 20px #0ff;
@@ -35,83 +39,86 @@ if (!isset($_SESSION['user_id'])) {
             color: #0ff;
             text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
             margin: 0;
+            font-size: 20px;
         }
 
         .header p {
             color: #ff00ff;
             text-shadow: 0 0 10px #ff00ff;
-            margin-top: 10px;
+            margin-top: 8px;
+            font-size: 14px;
         }
 
         .logout {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
         }
 
         .logout a {
-            padding: 8px 15px;
+            padding: 6px 12px;
             border: 1px solid #ff00ff;
-            border-radius: 8px;
+            border-radius: 6px;
             color: white;
             text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
+            font-size: 12px;
         }
 
         .logout a:hover {
             background: #ff00ff;
             color: black;
-            box-shadow: 0 0 15px #ff00ff;
         }
 
+        /* ✅ MOBILE GRID */
         .container {
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 25px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        /* DESKTOP */
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: repeat(3, 1fr);
+                padding: 40px;
+            }
         }
 
         .card {
-            background: rgba(10,10,10,0.8);
+            background: rgba(10,10,10,0.85);
             border: 1px solid #0ff;
             border-radius: 15px;
-            padding: 25px;
-            width: 260px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 0 15px #0ff;
-            transition: 0.3s ease;
-        }
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px #ff00ff, 0 0 40px #0ff;
-            border-color: #ff00ff;
         }
 
         .card h3 {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
+            font-size: 16px;
         }
 
+        /* ✅ BIGGER BUTTONS FOR PHONE */
         .card a {
             display: block;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             color: #fff;
             text-decoration: none;
             border: 1px solid #ff00ff;
             border-radius: 8px;
-            transition: 0.3s;
             background: transparent;
+            font-size: 14px;
+            min-height: 45px;
         }
 
         .card a:hover {
             background: #ff00ff;
-            box-shadow: 0 0 15px #ff00ff;
             color: #000;
+            box-shadow: 0 0 10px #ff00ff;
         }
 
     </style>
