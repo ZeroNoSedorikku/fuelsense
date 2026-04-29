@@ -49,12 +49,15 @@ $days_logged = $distance_data['days_logged'] ?? 0;
 
 // Calculations
 $km_per_liter = ($total_liters > 0) ? ($total_distance / $total_liters) : 0;
+
+// safer cost per km calculation
 $cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
 
+// estimate daily average based on full month (not logged days)
 $days_in_month = date('t');
-$avg_km_per_day = ($days_logged > 0) ? ($total_distance / $days_logged) : 0;
 
-$predicted_cost = $avg_km_per_day * $days_in_month * $cost_per_km;
+$avg_km_per_day = $total_distance / $days_in_month;
+$predicted_cost = $total_cost;
 ?>
 
 <!DOCTYPE html>
