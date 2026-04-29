@@ -1,8 +1,14 @@
 <?php
 session_start();
-
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
+// MUST check existence first
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     header("Location: login.php");
+    exit();
+}
+
+// THEN check role
+if ($_SESSION['role'] !== 'admin') {
+    header("Location: dashboard.php");
     exit();
 }
 ?>
