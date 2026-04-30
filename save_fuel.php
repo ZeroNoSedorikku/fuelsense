@@ -13,8 +13,8 @@ $user_id = $_SESSION['user_id'];
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $date = $_POST['date'];
-    $liters = $_POST['liters'];
-    $cost = $_POST['cost'];
+    $liters = (float) $_POST['liters'];
+    $cost = (float) $_POST['cost'];
 
     // Validation
     if (empty($date) || empty($liters) || empty($cost)) {

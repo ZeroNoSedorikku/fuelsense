@@ -14,7 +14,7 @@ $user_id = $_SESSION['user_id'];
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $date = $_POST['date'];
-    $distance = $_POST['distance'];
+    $distance = (float) $_POST['distance'];
 
     // Detect mode
     if (isset($_POST['mode'])) {

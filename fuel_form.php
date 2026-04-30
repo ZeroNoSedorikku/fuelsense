@@ -131,7 +131,7 @@ if (!isset($_SESSION['user_id'])) {
         <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
 
         <label>Liters</label>
-        <input type="number" name="liters" step="0.01" required>
+        <input type="number" name="liters" step="0.01" min="0" required>
 
         <label>Cost</label>
         <input type="number" name="cost" step="0.01" required>
