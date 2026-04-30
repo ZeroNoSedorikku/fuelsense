@@ -63,13 +63,16 @@ if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
 
 }
         body {
+            margin: 0;
             font-family: 'Orbitron', sans-serif;
             background: radial-gradient(circle at top, #0d0d0d, #000);
             color: white;
-            text-align: center;
-            padding: 30px;
-        }
 
+            display: flex;
+            justify-content: center;   /* horizontal center */
+            align-items: flex-start;   /* top align (better for scrolling) */
+            min-height: 100vh;
+        }
         .card {
             background: rgba(10,10,10,0.9);
             padding: 30px;
@@ -101,10 +104,20 @@ if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
             margin-top: 20px;
             color: #0ff;
         }
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;  /* controls centered width */
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;   /* THIS centers it */
+        }
     </style>
 </head>
 <body>
-
+<div class="page-wrapper">
 <div class="card">
     <h2>🔧 Maintenance Prediction</h2>
 
@@ -121,6 +134,6 @@ if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
 
     <a href="dashboard.php">⬅ Back to Dashboard</a>
 </div>
-
+</div>
 </body>
 </html>

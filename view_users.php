@@ -12,6 +12,7 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
 <!DOCTYPE html>
 <html>
 <head>
+    <div class="page-wrapper">
     <title>Users - Admin</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,8 +45,12 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             font-family: 'Orbitron', sans-serif;
             background: radial-gradient(circle at top, #0d0d0d, #000);
             color: white;
-        }
 
+            display: flex;
+            justify-content: center;   /* horizontal center */
+            align-items: flex-start;   /* top align (better for scrolling) */
+            min-height: 100vh;
+        }
         .header {
             text-align: center;
             padding: 20px;
@@ -132,11 +137,17 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             color: black;
             box-shadow: 0 0 15px #ff004c;
         }
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;  /* controls centered width */
+            padding: 20px;
+        }
 
     </style>
+    </div>
 </head>
-<body>
 
+<div class="page-wrapper">
 <div class="header">
     <h2>⚠ Admin - User Management</h2>
 </div>

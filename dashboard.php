@@ -42,8 +42,13 @@ if (!isset($_SESSION['user_id'])) {
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000000);
-            color: #fff;
+            background: radial-gradient(circle at top, #0d0d0d, #000);
+            color: white;
+
+            display: flex;
+            justify-content: center;   /* horizontal center */
+            align-items: flex-start;   /* top align (better for scrolling) */
+            min-height: 100vh;
         }
 
         .header {
@@ -132,11 +137,16 @@ if (!isset($_SESSION['user_id'])) {
             color: #000;
             box-shadow: 0 0 10px #ff00ff;
         }
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;  /* controls centered width */
+            padding: 20px;
+        }
 
     </style>
 </head>
 <body>
-
+<div class="page-wrapper">
 <div class="header">
     <h2>⚡ FuelSense Dashboard ⚡</h2>
     <p>Welcome, <?php echo $_SESSION['email'] ?? 'User'; ?></p>
@@ -171,6 +181,6 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
 </div>
-
+</div>
 </body>
 </html>

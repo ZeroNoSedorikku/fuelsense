@@ -51,6 +51,11 @@ $result = pg_query($conn, $query);
             font-family: 'Orbitron', sans-serif;
             background: radial-gradient(circle at top, #0d0d0d, #000);
             color: white;
+
+            display: flex;
+            justify-content: center;   /* horizontal center */
+            align-items: flex-start;   /* top align (better for scrolling) */
+            min-height: 100vh;
         }
 
         .header {
@@ -107,10 +112,15 @@ $result = pg_query($conn, $query);
             background: red;
             color: black;
         }
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;  /* controls centered width */
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
-
+<div class="page-wrapper">
 <div class="header">
     <h2>⛽ Fuel Logs</h2>
 </div>
@@ -140,6 +150,6 @@ $result = pg_query($conn, $query);
 </div>
 
 </div>
-
+</div>
 </body>
 </html>

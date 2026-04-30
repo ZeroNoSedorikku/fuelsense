@@ -91,11 +91,15 @@ $predicted_cost = $total_cost;
 
 }
         body {
+            margin: 0;
             font-family: 'Orbitron', sans-serif;
             background: radial-gradient(circle at top, #0d0d0d, #000);
             color: white;
-            text-align: center;
-            padding: 30px;
+
+            display: flex;
+            justify-content: center;   /* horizontal center */
+            align-items: flex-start;   /* top align (better for scrolling) */
+            min-height: 100vh;
         }
 
         .card {
@@ -124,10 +128,20 @@ $predicted_cost = $total_cost;
             display: block;
             margin-top: 20px;
         }
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;  /* controls centered width */
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;   /* THIS centers it */
+        }
     </style>
 </head>
 <body>
-
+<div class="page-wrapper">
 <div class="card">
     <h2>🚀 Smart Fuel Report</h2>
 
@@ -155,6 +169,6 @@ $predicted_cost = $total_cost;
 
     <a href="dashboard.php">⬅ Back to Dashboard</a>
 </div>
-
+</div>
 </body>
 </html>
