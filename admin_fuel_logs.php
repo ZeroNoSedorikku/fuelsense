@@ -2,7 +2,7 @@
 session_start();
 include 'db.php';
 
-if ($_SESSION['role'] != 'admin') {
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     exit("Access denied");
 }
 
@@ -26,26 +26,6 @@ $result = pg_query($conn, $query);
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -53,9 +33,15 @@ $result = pg_query($conn, $query);
             color: white;
 
             display: flex;
-            justify-content: center;   /* horizontal center */
-            align-items: flex-start;   /* top align (better for scrolling) */
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
         }
 
         .header {
@@ -68,14 +54,21 @@ $result = pg_query($conn, $query);
         h2 {
             color: red;
             text-shadow: 0 0 10px red;
+            margin: 0;
         }
 
         .container {
-            padding: 30px;
+            margin-top: 20px;
+        }
+
+        /* ✅ IMPORTANT: mobile fix */
+        .table-wrapper {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
+            min-width: 500px; /* prevents squeezing */
             border-collapse: collapse;
             background: rgba(10,10,10,0.9);
             border: 1px solid red;
@@ -104,7 +97,8 @@ $result = pg_query($conn, $query);
         .back a {
             color: white;
             border: 1px solid red;
-            padding: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
             text-decoration: none;
         }
 
@@ -112,44 +106,58 @@ $result = pg_query($conn, $query);
             background: red;
             color: black;
         }
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;  /* controls centered width */
-            padding: 20px;
+
+        /* ✅ mobile polish */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 18px;
+            }
+
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
+
 <body>
+
 <div class="page-wrapper">
-<div class="header">
-    <h2>⛽ Fuel Logs</h2>
+
+    <div class="header">
+        <h2>⛽ Fuel Logs</h2>
+    </div>
+
+    <div class="container">
+
+        <div class="table-wrapper">
+            <table>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Liters</th>
+                    <th>Cost</th>
+                </tr>
+
+                <?php while ($row = pg_fetch_assoc($result)): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['email']) ?></td>
+                    <td><?= htmlspecialchars($row['date']) ?></td>
+                    <td><?= htmlspecialchars($row['liters']) ?></td>
+                    <td>₱<?= htmlspecialchars($row['cost']) ?></td>
+                </tr>
+                <?php endwhile; ?>
+            </table>
+        </div>
+
+        <div class="back">
+            <a href="admin_dashboard.php">⬅ Back</a>
+        </div>
+
+    </div>
+
 </div>
 
-<div class="container">
-
-<table>
-<tr>
-    <th>User</th>
-    <th>Date</th>
-    <th>Liters</th>
-    <th>Cost</th>
-</tr>
-
-<?php while ($row = pg_fetch_assoc($result)): ?>
-<tr>
-    <td><?= $row['email'] ?></td>
-    <td><?= $row['date'] ?></td>
-    <td><?= $row['liters'] ?></td>
-    <td>₱<?= $row['cost'] ?></td>
-</tr>
-<?php endwhile; ?>
-</table>
-
-<div class="back">
-    <a href="admin_dashboard.php">⬅ Back</a>
-</div>
-
-</div>
-</div>
 </body>
 </html>

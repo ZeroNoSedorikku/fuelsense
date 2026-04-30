@@ -9,20 +9,15 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get total distance of user
 $query = "SELECT SUM(distance_km) AS total_km FROM distance_logs WHERE user_id = $1";
 $result = pg_query_params($conn, $query, [$user_id]);
 
 $data = pg_fetch_assoc($result);
 $total_km = $data['total_km'] ?? 0;
 
-// Maintenance threshold
 $oil_change_km = 1000;
-
-// Compute remaining km
 $remaining_km = $oil_change_km - ($total_km % $oil_change_km);
 
-// Status
 if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
     $status = "⚠️ Maintenance Required!";
 } elseif ($remaining_km <= 200) {
@@ -42,26 +37,6 @@ if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -69,71 +44,74 @@ if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
             color: white;
 
             display: flex;
-            justify-content: center;   /* horizontal center */
-            align-items: flex-start;   /* top align (better for scrolling) */
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
+
         .card {
             background: rgba(10,10,10,0.9);
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             border: 1px solid #0ff;
             box-shadow: 0 0 20px #0ff;
-            display: inline-block;
-            width: 400px;
+
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
         }
 
         h2 {
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
+            font-size: 20px;
         }
 
         .value {
             color: #ff00ff;
-            font-size: 20px;
+            font-size: 18px;
             text-shadow: 0 0 10px #ff00ff;
         }
 
         .status {
             margin-top: 15px;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         a {
-            display: block;
+            display: inline-block;
             margin-top: 20px;
+            padding: 10px 15px;
+            border: 1px solid #0ff;
+            border-radius: 8px;
             color: #0ff;
+            text-decoration: none;
         }
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;  /* controls centered width */
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;   /* THIS centers it */
+
+        a:hover {
+            background: #0ff;
+            color: black;
         }
     </style>
 </head>
 <body>
-<div class="page-wrapper">
+
 <div class="card">
     <h2>🔧 Maintenance Prediction</h2>
 
     <p>Total Distance Traveled:</p>
     <p class="value"><?= number_format($total_km, 2) ?> km</p>
 
-    <p>Next Oil Change At:</p>
-    <p class="value"><?= $oil_change_km ?> km intervals</p>
+    <p>Next Oil Change:</p>
+    <p class="value"><?= $oil_change_km ?> km</p>
 
-    <p>Remaining Distance Before Maintenance:</p>
+    <p>Remaining Distance:</p>
     <p class="value"><?= number_format($remaining_km, 2) ?> km</p>
 
     <p class="status"><?= $status ?></p>
 
     <a href="dashboard.php">⬅ Back to Dashboard</a>
 </div>
-</div>
+
 </body>
 </html>

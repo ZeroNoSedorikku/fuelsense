@@ -49,13 +49,9 @@ $days_logged = $distance_data['days_logged'] ?? 0;
 
 // Calculations
 $km_per_liter = ($total_liters > 0) ? ($total_distance / $total_liters) : 0;
-
-// safer cost per km calculation
 $cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
 
-// estimate daily average based on full month (not logged days)
 $days_in_month = date('t');
-
 $avg_km_per_day = $total_distance / $days_in_month;
 $predicted_cost = $total_cost;
 ?>
@@ -70,26 +66,6 @@ $predicted_cost = $total_cost;
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -97,78 +73,121 @@ $predicted_cost = $total_cost;
             color: white;
 
             display: flex;
-            justify-content: center;   /* horizontal center */
-            align-items: flex-start;   /* top align (better for scrolling) */
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            display: flex;
+            justify-content: center; /* centers card */
         }
 
         .card {
             background: rgba(10,10,10,0.9);
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             border: 1px solid #0ff;
             box-shadow: 0 0 20px #0ff;
-            display: inline-block;
-            width: 400px;
+
+            width: 100%;
+            max-width: 420px; /* responsive instead of fixed */
+            text-align: center;
         }
 
         h2 {
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
+            font-size: 20px;
         }
 
         .value {
             color: #ff00ff;
-            font-size: 20px;
+            font-size: 18px;
             text-shadow: 0 0 10px #ff00ff;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid rgba(0,255,255,0.3);
+            margin: 15px 0;
         }
 
         a {
-            color: #0ff;
-            display: block;
+            display: inline-block;
             margin-top: 20px;
+            padding: 8px 15px;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+            color: #0ff;
+            text-decoration: none;
+            transition: 0.3s;
         }
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;  /* controls centered width */
-            padding: 20px;
+
+        a:hover {
+            background: #0ff;
+            color: black;
+            box-shadow: 0 0 10px #0ff;
         }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;   /* THIS centers it */
+
+        /* MOBILE FIX */
+        @media (max-width: 600px) {
+            .card {
+                max-width: 95%;
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .value {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
+
 <div class="page-wrapper">
-<div class="card">
-    <h2>🚀 Smart Fuel Report</h2>
 
-    <p>Total Distance:</p>
-    <p class="value"><?= number_format($total_distance, 2) ?> km</p>
+    <div class="card">
+        <h2>🚀 Smart Fuel Report</h2>
 
-    <p>Total Fuel Used:</p>
-    <p class="value"><?= number_format($total_liters, 2) ?> L</p>
+        <p>Total Distance:</p>
+        <p class="value"><?= number_format($total_distance, 2) ?> km</p>
 
-    <p>Total Cost:</p>
-    <p class="value">₱<?= number_format($total_cost, 2) ?></p>
+        <p>Total Fuel Used:</p>
+        <p class="value"><?= number_format($total_liters, 2) ?> L</p>
 
-    <hr>
+        <p>Total Cost:</p>
+        <p class="value">₱<?= number_format($total_cost, 2) ?></p>
 
-    <p>Fuel Efficiency (km/L):</p>
-    <p class="value"><?= number_format($km_per_liter, 2) ?></p>
+        <hr>
 
-    <p>Cost per km:</p>
-    <p class="value">₱<?= number_format($cost_per_km, 4) ?></p>
+        <p>Fuel Efficiency (km/L):</p>
+        <p class="value"><?= number_format($km_per_liter, 2) ?></p>
 
-    <hr>
+        <p>Cost per km:</p>
+        <p class="value">₱<?= number_format($cost_per_km, 4) ?></p>
 
-    <p>Predicted Monthly Expense:</p>
-    <p class="value">₱<?= number_format($predicted_cost, 2) ?></p>
+        <hr>
 
-    <a href="dashboard.php">⬅ Back to Dashboard</a>
+        <p>Predicted Monthly Expense:</p>
+        <p class="value">₱<?= number_format($predicted_cost, 2) ?></p>
+
+        <a href="dashboard.php">⬅ Back to Dashboard</a>
+    </div>
+
 </div>
-</div>
+
 </body>
 </html>

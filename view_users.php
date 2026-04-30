@@ -12,7 +12,6 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
 <!DOCTYPE html>
 <html>
 <head>
-    <div class="page-wrapper">
     <title>Users - Admin</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,26 +19,6 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -47,10 +26,17 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             color: white;
 
             display: flex;
-            justify-content: center;   /* horizontal center */
-            align-items: flex-start;   /* top align (better for scrolling) */
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+
         .header {
             text-align: center;
             padding: 20px;
@@ -65,11 +51,17 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
         }
 
         .container {
-            padding: 30px;
+            margin-top: 20px;
+        }
+
+        /* ✅ TABLE SCROLL FIX FOR MOBILE */
+        .table-wrapper {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
+            min-width: 500px;
             border-collapse: collapse;
             background: rgba(10,10,10,0.9);
             border: 1px solid #ff004c;
@@ -102,8 +94,8 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             border: 1px solid #ff004c;
             padding: 6px 10px;
             border-radius: 6px;
-            transition: 0.3s;
             font-size: 12px;
+            transition: 0.3s;
         }
 
         .delete-btn:hover {
@@ -129,7 +121,6 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             border-radius: 8px;
             color: #ff004c;
             text-decoration: none;
-            transition: 0.3s;
         }
 
         .back a:hover {
@@ -137,54 +128,69 @@ $result = pg_query($conn, "SELECT user_id, email, role FROM users");
             color: black;
             box-shadow: 0 0 15px #ff004c;
         }
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;  /* controls centered width */
-            padding: 20px;
-        }
 
+        /* ✅ MOBILE FIX */
+        @media (max-width: 600px) {
+            .header h2 {
+                font-size: 18px;
+            }
+
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
     </style>
-    </div>
 </head>
 
+<body>
+
 <div class="page-wrapper">
-<div class="header">
-    <h2>⚠ Admin - User Management</h2>
+
+    <div class="header">
+        <h2>⚠ Admin - User Management</h2>
+    </div>
+
+    <div class="container">
+
+        <div class="table-wrapper">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+
+                <?php while ($row = pg_fetch_assoc($result)): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['user_id']) ?></td>
+                    <td><?= htmlspecialchars($row['email']) ?></td>
+                    <td><?= htmlspecialchars($row['role']) ?></td>
+                    <td>
+                        <?php if ($row['user_id'] != $_SESSION['user_id']): ?>
+                            <a class="delete-btn"
+                               href="delete_user.php?id=<?= $row['user_id'] ?>"
+                               onclick="return confirm('⚠ Delete this user?')">
+                               Delete
+                            </a>
+                        <?php else: ?>
+                            <span class="you">You</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+
+            </table>
+        </div>
+
+        <div class="back">
+            <a href="admin_dashboard.php">⬅ Back to Admin Panel</a>
+        </div>
+
+    </div>
+
 </div>
 
-<div class="container">
-
-<table>
-<tr>
-    <th>ID</th>
-    <th>Email</th>
-    <th>Role</th>
-    <th>Action</th>
-</tr>
-
-<?php while ($row = pg_fetch_assoc($result)): ?>
-<tr>
-    <td><?= htmlspecialchars($row['user_id']) ?></td>
-    <td><?= htmlspecialchars($row['email']) ?></td>
-    <td><?= htmlspecialchars($row['role']) ?></td>
-    <td>
-        <?php if ($row['user_id'] != $_SESSION['user_id']): ?>
-            <a class="delete-btn"
-               href="delete_user.php?id=<?= $row['user_id'] ?>"
-               onclick="return confirm('⚠ Delete this user?')">
-               Delete
-            </a>
-        <?php else: ?>
-            <span class="you">You</span>
-        <?php endif; ?>
-    </td>
-</tr>
-<?php endwhile; ?>
-
-</table>
-
-<div class="back">
-    <a href="admin_dashboard.php">⬅ Back to Admin Panel</a>
-</div>
-
-</div>
+</body>
+</html>
