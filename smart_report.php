@@ -56,9 +56,20 @@ $days_logged = $distance_data['days_logged'] ?? 0;
 // =====================
 // CALCULATIONS
 // =====================
-$km_per_liter = ($total_liters > 0) ? ($total_distance / $total_liters) : 0;
-$cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
+$km_per_liter = ($total_liters > 0)
+    ? ($total_distance / $total_liters)
+    : 0;
 
+$cost_per_km = ($total_distance > 0)
+    ? ($total_cost / $total_distance)
+    : 0;
+
+// use real monthly projection
+$avg_km_per_day = ($days_logged > 0)
+    ? ($total_distance / $days_logged)
+    : 0;
+
+$predicted_cost = $cost_per_km * ($avg_km_per_day * $days_in_month);
 // =====================
 // SMART PREDICTION
 // =====================
