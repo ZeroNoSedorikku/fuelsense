@@ -9,11 +9,15 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get current month
+// Current month
 $month = date('m');
 $year = date('Y');
+$current_day = date('d');
+$days_in_month = date('t');
 
-// Get total fuel data
+// =====================
+// FUEL DATA
+// =====================
 $fuel_query = "
     SELECT 
         SUM(liters) AS total_liters,
@@ -30,7 +34,9 @@ $fuel_data = pg_fetch_assoc($fuel_result);
 $total_liters = $fuel_data['total_liters'] ?? 0;
 $total_cost = $fuel_data['total_cost'] ?? 0;
 
-// Get total distance
+// =====================
+// DISTANCE DATA
+// =====================
 $distance_query = "
     SELECT 
         SUM(distance_km) AS total_distance,
@@ -47,13 +53,26 @@ $distance_data = pg_fetch_assoc($distance_result);
 $total_distance = $distance_data['total_distance'] ?? 0;
 $days_logged = $distance_data['days_logged'] ?? 0;
 
-// Calculations
+// =====================
+// CALCULATIONS
+// =====================
 $km_per_liter = ($total_liters > 0) ? ($total_distance / $total_liters) : 0;
 $cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
 
-$days_in_month = date('t');
-$avg_km_per_day = $total_distance / $days_in_month;
-$predicted_cost = $total_cost;
+// =====================
+// SMART PREDICTION
+// =====================
+
+// Use days_logged (real usage) instead of total days passed
+$avg_cost_per_day = ($days_logged > 0) ? ($total_cost / $days_logged) : 0;
+$avg_km_per_day = ($days_logged > 0) ? ($total_distance / $days_logged) : 0;
+
+// Project to full month
+$predicted_cost = $avg_cost_per_day * $days_in_month;
+$predicted_distance = $avg_km_per_day * $days_in_month;
+
+// Accuracy indicator (optional but useful)
+$accuracy = ($days_logged / $days_in_month) * 100;
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +102,7 @@ $predicted_cost = $total_cost;
             max-width: 1000px;
             padding: 20px;
             display: flex;
-            justify-content: center; /* centers card */
+            justify-content: center;
         }
 
         .card {
@@ -94,7 +113,7 @@ $predicted_cost = $total_cost;
             box-shadow: 0 0 20px #0ff;
 
             width: 100%;
-            max-width: 420px; /* responsive instead of fixed */
+            max-width: 420px;
             text-align: center;
         }
 
@@ -121,6 +140,12 @@ $predicted_cost = $total_cost;
             margin: 15px 0;
         }
 
+        .note {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
         a {
             display: inline-block;
             margin-top: 20px;
@@ -129,7 +154,6 @@ $predicted_cost = $total_cost;
             border-radius: 8px;
             color: #0ff;
             text-decoration: none;
-            transition: 0.3s;
         }
 
         a:hover {
@@ -138,7 +162,6 @@ $predicted_cost = $total_cost;
             box-shadow: 0 0 10px #0ff;
         }
 
-        /* MOBILE FIX */
         @media (max-width: 600px) {
             .card {
                 max-width: 95%;
@@ -181,8 +204,15 @@ $predicted_cost = $total_cost;
 
         <hr>
 
-        <p>Predicted Monthly Expense:</p>
+        <p>📊 Predicted Monthly Distance:</p>
+        <p class="value"><?= number_format($predicted_distance, 2) ?> km</p>
+
+        <p>💸 Predicted Monthly Expense:</p>
         <p class="value">₱<?= number_format($predicted_cost, 2) ?></p>
+
+        <p class="note">
+            Accuracy: <?= number_format($accuracy, 1) ?>% (based on <?= $days_logged ?> days logged)
+        </p>
 
         <a href="dashboard.php">⬅ Back to Dashboard</a>
     </div>
