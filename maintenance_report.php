@@ -13,12 +13,20 @@ $query = "SELECT SUM(distance_km) AS total_km FROM distance_logs WHERE user_id =
 $result = pg_query_params($conn, $query, [$user_id]);
 
 $data = pg_fetch_assoc($result);
-$total_km = $data['total_km'] ?? 0;
+$total_km = (float)($data['total_km'] ?? 0);
 
 $oil_change_km = 1000;
-$remaining_km = $oil_change_km - ($total_km % $oil_change_km);
 
-if ($remaining_km <= 0 || $remaining_km == $oil_change_km) {
+$remaining_km = $oil_change_km - fmod($total_km, $oil_change_km);
+
+$total_km = (float)$total_km;
+
+$oil_change_km = 1000;
+
+$used_km = fmod($total_km, $oil_change_km);
+$remaining_km = $oil_change_km - $used_km;
+
+if (abs($used_km) < 0.01 && $total_km > 0) {
     $status = "⚠️ Maintenance Required!";
 } elseif ($remaining_km <= 200) {
     $status = "⚠️ Maintenance Soon";
