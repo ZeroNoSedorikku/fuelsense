@@ -38,7 +38,8 @@ $total_cost = (float) $fuel_data['total_cost'];
 // =====================
 $distance_query = "
     SELECT 
-        COALESCE(SUM(distance_km), 0) AS total_distance
+        COALESCE(SUM(distance_km), 0) AS total_distance,
+        COUNT(DISTINCT date) AS days_logged
     FROM distance_logs
     WHERE user_id = $1
     AND date >= CURRENT_DATE - INTERVAL '30 days'
@@ -48,7 +49,7 @@ $distance_result = pg_query_params($conn, $distance_query, [$user_id]);
 $distance_data = pg_fetch_assoc($distance_result);
 
 $total_distance = (float) $distance_data['total_distance'];
-$days_logged = $distance_data['days_logged'] ?? 0;
+$days_logged = (int) $distance_data['days_logged'];
 
 // =====================
 // CALCULATIONS
@@ -59,17 +60,14 @@ $cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
 // =====================
 // SMART PREDICTION
 // =====================
-
-// Use days_logged (real usage) instead of total days passed
-$avg_cost_per_day = ($days_logged > 0) ? ($total_cost / $days_logged) : 0;
 $avg_km_per_day = ($days_logged > 0) ? ($total_distance / $days_logged) : 0;
 
-// Project to full month
-$predicted_cost = $avg_cost_per_day * $days_in_month;
 $predicted_distance = $avg_km_per_day * $days_in_month;
 
-// Accuracy indicator (optional but useful)
-$accuracy = ($days_logged / $days_in_month) * 100;
+$predicted_cost = $predicted_distance * $cost_per_km;
+
+// Accuracy
+$accuracy = ($days_in_month > 0) ? ($days_logged / $days_in_month) * 100 : 0;
 ?>
 
 <!DOCTYPE html>
