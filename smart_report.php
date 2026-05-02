@@ -24,11 +24,10 @@ $fuel_query = "
         COALESCE(SUM(cost), 0) AS total_cost
     FROM fuel_logs
     WHERE user_id = $1
-    AND EXTRACT(MONTH FROM date) = $2
-    AND EXTRACT(YEAR FROM date) = $3
+    AND date >= CURRENT_DATE - INTERVAL '30 days'
 ";
 
-$fuel_result = pg_query_params($conn, $fuel_query, [$user_id, $month, $year]);
+$fuel_result = pg_query_params($conn, $fuel_query, [$user_id]);
 $fuel_data = pg_fetch_assoc($fuel_result);
 
 $total_liters = (float) $fuel_data['total_liters'];
@@ -39,12 +38,10 @@ $total_cost = (float) $fuel_data['total_cost'];
 // =====================
 $distance_query = "
     SELECT 
-        COALESCE(SUM(distance_km), 0) AS total_distance,
-        COUNT(DISTINCT date) AS days_logged
+        COALESCE(SUM(distance_km), 0) AS total_distance
     FROM distance_logs
     WHERE user_id = $1
-    AND EXTRACT(MONTH FROM date) = $2
-    AND EXTRACT(YEAR FROM date) = $3
+    AND date >= CURRENT_DATE - INTERVAL '30 days'
 ";
 
 $distance_result = pg_query_params($conn, $distance_query, [$user_id, $month, $year]);

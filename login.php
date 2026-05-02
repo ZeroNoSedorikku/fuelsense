@@ -70,6 +70,7 @@
             border-radius: 8px;
             color: white;
             outline: none;
+            box-sizing: border-box;
         }
 
         input:focus {
