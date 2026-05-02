@@ -121,7 +121,24 @@
         <input type="email" name="email" required>
 
         <label>Password</label>
-        <input type="password" name="password" required>
+        <div style="position: relative; width: 100%;">
+    <label>Password</label>
+
+    <input type="password" name="password" id="password" required>
+
+    <span onclick="togglePassword()" 
+          style="
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            color: #0ff;
+            font-size: 14px;
+            user-select: none;
+          ">
+        👁
+    </span>
+</div>
 
         <button type="submit">Login</button>
     </form>
@@ -132,5 +149,16 @@
     </div>
 </div>
 
+<script>
+function togglePassword() {
+    let pass = document.getElementById("password");
+
+    if (pass.type === "password") {
+        pass.type = "text";
+    } else {
+        pass.type = "password";
+    }
+}
+</script>
 </body>
 </html>
