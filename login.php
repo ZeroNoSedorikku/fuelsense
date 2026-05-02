@@ -114,31 +114,30 @@
 <body>
 
 <div class="login-box">
-    <h2>⚡ FuelSense Login</h2>
+    <h2> FuelSense Login</h2>
 
     <form method="POST" action="process_login.php">
         <label>Email</label>
         <input type="email" name="email" required>
 
-        <label>Password</label>
         <div style="position: relative; width: 100%;">
-    <label>Password</label>
+        <label>Password</label>
 
-    <input type="password" name="password" id="password" required>
+        <input type="password" name="password" id="password" required>
 
-    <span onclick="togglePassword()" 
-          style="
-            position: absolute;
-            right: 10px;
-            top: 38px;
-            cursor: pointer;
-            color: #0ff;
-            font-size: 14px;
-            user-select: none;
-          ">
-        👁
-    </span>
-</div>
+        <span onclick="togglePassword()" 
+            style="
+                position: absolute;
+                right: 10px;
+                top: 38px;
+                cursor: pointer;
+                color: #0ff;
+                font-size: 14px;
+                user-select: none;
+            ">
+            👁
+        </span>
+    </div>
 
         <button type="submit">Login</button>
     </form>

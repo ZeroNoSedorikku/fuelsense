@@ -114,7 +114,7 @@
 <body>
 
 <div class="register-box">
-    <h2>⚡ Create Account</h2>
+    <h2> Create Account</h2>
 
     <form method="POST" action="process_register.php">
         <label>Name</label>
