@@ -44,7 +44,7 @@ $distance_query = "
     AND date >= CURRENT_DATE - INTERVAL '30 days'
 ";
 
-$distance_result = pg_query_params($conn, $distance_query, [$user_id, $month, $year]);
+$distance_result = pg_query_params($conn, $distance_query, [$user_id]);
 $distance_data = pg_fetch_assoc($distance_result);
 
 $total_distance = (float) $distance_data['total_distance'];
