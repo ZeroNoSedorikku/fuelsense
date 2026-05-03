@@ -2,34 +2,29 @@
 session_start();
 include 'db.php';
 
-// Protect page
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+    exit("Access denied");
 }
 
-$user_id = $_SESSION['user_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-// Check if POST
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $user_id = $_SESSION['user_id'];
 
-    $date = $_POST['date'];
-    $distance = (float) $_POST['distance'];
+    // safer inputs
+    $date = $_POST['date'] ?? date('Y-m-d');
+    $distance = isset($_POST['distance']) ? (float) $_POST['distance'] : 0;
+    $mode = $_POST['mode'] ?? 'Manual'; // supports GPS + Manual
 
-    // Detect mode
-    if (isset($_POST['mode'])) {
-        $mode = $_POST['mode']; // GPS
-    } else {
-        $mode = "Manual";
+    // validation
+    if (empty($date)) {
+        exit("Date is required");
     }
 
-    // Validate
-    if (empty($date) || empty($distance)) {
-        echo "All fields are required!";
-        exit();
+    if ($distance <= 0) {
+        exit("Invalid distance");
     }
 
-    // Insert safely
+    // insert
     $query = "INSERT INTO distance_logs (user_id, date, distance_km, mode)
               VALUES ($1, $2, $3, $4)";
 
@@ -40,11 +35,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mode
     ]);
 
-    if ($result) {
-        header("Location: view_distance.php");
-        exit();
-    } else {
-        echo "Error saving distance!";
+    if (!$result) {
+        exit("Database error");
     }
+
+    header("Location: view_distance.php");
+    exit();
 }
 ?>

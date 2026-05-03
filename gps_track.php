@@ -18,26 +18,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -57,12 +37,12 @@ if (!isset($_SESSION['user_id'])) {
             box-shadow: 0 0 20px #0ff;
             width: 90%;
             max-width: 400px;
+            text-align: center;
         }
 
         h2 {
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
-            font-size: 20px;
         }
 
         .distance-box {
@@ -82,6 +62,7 @@ if (!isset($_SESSION['user_id'])) {
             width: 100%;
             padding: 10px;
             margin: 5px 0;
+            cursor: pointer;
         }
 
         #start {
@@ -160,6 +141,7 @@ if (!isset($_SESSION['user_id'])) {
 let watchId = null;
 let lastPosition = null;
 let totalDistance = 0;
+let isTracking = false;
 
 function toRad(x) {
     return x * Math.PI / 180;
@@ -181,12 +163,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 document.getElementById("start").onclick = function () {
     if (!navigator.geolocation) {
-        alert("GPS not supported on this device.");
+        alert("GPS not supported.");
+        return;
+    }
+
+    if (isTracking) {
+        alert("Already tracking!");
         return;
     }
 
     totalDistance = 0;
     lastPosition = null;
+    isTracking = true;
 
     document.getElementById("status").innerText = "Tracking started...";
 
@@ -195,7 +183,6 @@ document.getElementById("start").onclick = function () {
         let lat = position.coords.latitude;
         let lon = position.coords.longitude;
 
-        // ignore bad accuracy readings
         if (position.coords.accuracy > 30) return;
 
         if (lastPosition) {
@@ -206,7 +193,6 @@ document.getElementById("start").onclick = function () {
                 lon
             );
 
-            // ignore tiny movements (noise)
             if (dist > 0.01) {
                 totalDistance += dist;
             }
@@ -225,18 +211,28 @@ document.getElementById("start").onclick = function () {
 };
 
 document.getElementById("stop").onclick = function () {
-    if (watchId === null) {
+    if (!isTracking) {
         alert("Start tracking first!");
         return;
     }
 
     navigator.geolocation.clearWatch(watchId);
 
+    watchId = null;
+    isTracking = false;
+
     document.getElementById("status").innerText = "Tracking stopped ✔";
+
+    // prevent saving useless data
+    if (totalDistance <= 0) {
+        alert("No distance recorded!");
+        return;
+    }
 
     if (confirm("Save this distance?")) {
         document.getElementById("finalDistance").value = totalDistance.toFixed(2);
         document.getElementById("date").value = new Date().toISOString().split('T')[0];
+
         document.getElementById("saveForm").submit();
     }
 };
