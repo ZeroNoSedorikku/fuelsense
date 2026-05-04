@@ -1,8 +1,22 @@
 <?php
 session_start();
+include 'db.php';
 
+// Protect page
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Get vehicles of user
+$vehicle_query = "SELECT * FROM vehicles WHERE user_id = $1";
+$vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
+
+// Check if user has vehicles
+if (pg_num_rows($vehicle_result) == 0) {
+    echo "<p style='color:white;text-align:center;'>No vehicles found. <a href='add_vehicle.php'>Add one first</a></p>";
     exit();
 }
 ?>
@@ -17,26 +31,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -61,47 +55,40 @@ if (!isset($_SESSION['user_id'])) {
         h2 {
             text-align: center;
             color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin: 10px 0 5px;
+            margin-top: 10px;
             color: #ff00ff;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            margin-top: 5px;
             background: transparent;
             border: 1px solid #0ff;
             border-radius: 8px;
             color: white;
-            box-sizing: border-box; 
-        }
-
-        input:focus {
-            box-shadow: 0 0 10px #0ff;
+            box-sizing: border-box;
         }
 
         button {
             width: 100%;
             margin-top: 20px;
             padding: 12px;
-            background: transparent;
             border: 1px solid #ff00ff;
+            background: transparent;
             color: white;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         button:hover {
             background: #ff00ff;
             color: black;
-            box-shadow: 0 0 15px #ff00ff;
         }
 
         .back {
@@ -112,13 +99,11 @@ if (!isset($_SESSION['user_id'])) {
         .back a {
             color: #0ff;
             text-decoration: none;
-            font-size: 12px;
         }
 
         .back a:hover {
             text-shadow: 0 0 10px #0ff;
         }
-
     </style>
 </head>
 <body>
@@ -126,15 +111,33 @@ if (!isset($_SESSION['user_id'])) {
 <div class="form-container">
     <h2>⛽ Add Fuel</h2>
 
-    <form method="POST" action="save_fuel.php">
-        <label>Date</label>
-        <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+    <form method="POST" action="save_fuel.php" 
+          onsubmit="return confirm('Save this fuel record?');">
 
+        <!-- VEHICLE SELECT -->
+        <label>Select Vehicle</label>
+        <select name="vehicle_id" required>
+            <option value="">Select Vehicle</option>
+
+            <?php while ($v = pg_fetch_assoc($vehicle_result)): ?>
+                <option value="<?= $v['vehicle_id'] ?>">
+                    <?= htmlspecialchars($v['brand'] . ' ' . $v['model'] . ' (' . $v['cc'] . 'cc ' . $v['type'] . ')') ?>
+                </option>
+            <?php endwhile; ?>
+
+        </select>
+
+        <!-- DATE -->
+        <label>Date</label>
+        <input type="date" name="date" value="<?= date('Y-m-d') ?>" required>
+
+        <!-- LITERS -->
         <label>Liters</label>
         <input type="number" name="liters" step="0.01" min="0" required>
 
-        <label>Cost</label>
-        <input type="number" name="cost" step="0.01" required>
+        <!-- COST -->
+        <label>Cost (₱)</label>
+        <input type="number" name="cost" step="0.01" min="0" required>
 
         <button type="submit">Add Fuel</button>
     </form>

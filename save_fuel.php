@@ -5,7 +5,7 @@ include 'db.php';
 if (!isset($_SESSION['user_id'])) exit("Access denied");
 
 $user_id = $_SESSION['user_id'];
-$vehicle_id = $_POST['vehicle_id'];
+$vehicle_id = $_POST['vehicle_id'] ?? null;
 
 $date = $_POST['date'];
 $liters = (float) $_POST['liters'];
