@@ -3,214 +3,156 @@ session_start();
 include 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+    exit("Access denied");
 }
 
 $user_id = $_SESSION['user_id'];
+$vehicle_id = $_GET['vehicle_id'] ?? null;
 
-// Current month
-$month = (int) date('m');
-$year = (int) date('Y');
-$current_day = date('d');
-$days_in_month = date('t');
+if (!$vehicle_id) {
+    exit("No vehicle selected");
+}
 
 // =====================
-// FUEL DATA
+// VEHICLE INFO
+// =====================
+$vehicle_query = "
+    SELECT brand, model
+    FROM vehicles
+    WHERE vehicle_id = $1 AND user_id = $2
+";
+
+$vehicle_result = pg_query_params($conn, $vehicle_query, [$vehicle_id, $user_id]);
+$vehicle = pg_fetch_assoc($vehicle_result);
+
+if (!$vehicle) {
+    exit("Invalid vehicle");
+}
+
+// =====================
+// FUEL DATA (30 DAYS)
 // =====================
 $fuel_query = "
     SELECT 
-        COALESCE(SUM(liters), 0) AS total_liters,
-        COALESCE(SUM(cost), 0) AS total_cost
+        COALESCE(SUM(liters),0) AS total_liters,
+        COALESCE(SUM(cost),0) AS total_cost,
+        COUNT(DISTINCT date) AS days_logged
     FROM fuel_logs
     WHERE user_id = $1
+    AND vehicle_id = $2
     AND date >= CURRENT_DATE - INTERVAL '30 days'
 ";
 
-$fuel_result = pg_query_params($conn, $fuel_query, [$user_id]);
-$fuel_data = pg_fetch_assoc($fuel_result);
-
-$total_liters = (float) $fuel_data['total_liters'];
-$total_cost = (float) $fuel_data['total_cost'];
+$fuel_result = pg_query_params($conn, $fuel_query, [$user_id, $vehicle_id]);
+$fuel = pg_fetch_assoc($fuel_result);
 
 // =====================
 // DISTANCE DATA
 // =====================
 $distance_query = "
     SELECT 
-        COALESCE(SUM(distance_km), 0) AS total_distance,
-        COUNT(DISTINCT date) AS days_logged
+        COALESCE(SUM(distance_km),0) AS total_distance
     FROM distance_logs
     WHERE user_id = $1
+    AND vehicle_id = $2
     AND date >= CURRENT_DATE - INTERVAL '30 days'
 ";
 
-$distance_result = pg_query_params($conn, $distance_query, [$user_id]);
-$distance_data = pg_fetch_assoc($distance_result);
-
-$total_distance = (float) $distance_data['total_distance'];
-$days_logged = (int) $distance_data['days_logged'];
+$distance_result = pg_query_params($conn, $distance_query, [$user_id, $vehicle_id]);
+$distance = pg_fetch_assoc($distance_result);
 
 // =====================
 // CALCULATIONS
 // =====================
-$km_per_liter = ($total_liters > 0) ? ($total_distance / $total_liters) : 0;
-$cost_per_km = ($total_distance > 0) ? ($total_cost / $total_distance) : 0;
+$total_liters = (float)$fuel['total_liters'];
+$total_cost = (float)$fuel['total_cost'];
+$total_distance = (float)$distance['total_distance'];
+$days_logged = (int)$fuel['days_logged'];
 
-// =====================
-// SMART PREDICTION
-// =====================
-$avg_km_per_day = ($days_logged > 0) ? ($total_distance / $days_logged) : 0;
+$km_per_liter = $total_liters > 0 ? $total_distance / $total_liters : 0;
+$cost_per_km = $total_distance > 0 ? $total_cost / $total_distance : 0;
 
+// prediction
+$days_in_month = date('t');
+
+$avg_cost_per_day = $days_logged > 0 ? $total_cost / $days_logged : 0;
+$avg_km_per_day = $days_logged > 0 ? $total_distance / $days_logged : 0;
+
+$predicted_cost = $avg_cost_per_day * $days_in_month;
 $predicted_distance = $avg_km_per_day * $days_in_month;
 
-$predicted_cost = $predicted_distance * $cost_per_km;
-
-// Accuracy
-$accuracy = ($days_in_month > 0) ? ($days_logged / $days_in_month) * 100 : 0;
+$accuracy = $days_logged > 0 ? ($days_logged / $days_in_month) * 100 : 0;
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Smart Report - FuelSense</title>
+<title>Smart Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background:#000;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+}
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+.card {
+    margin:20px;
+    padding:20px;
+    max-width:400px;
+    width:100%;
+    border:1px solid #0ff;
+    text-align:center;
+}
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000);
-            color: white;
-
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-        }
-
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .card {
-            background: rgba(10,10,10,0.9);
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px #0ff;
-
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-        }
-
-        h2 {
-            color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-            font-size: 20px;
-        }
-
-        .value {
-            color: #ff00ff;
-            font-size: 18px;
-            text-shadow: 0 0 10px #ff00ff;
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin: 5px 0;
-        }
-
-        hr {
-            border: 0;
-            border-top: 1px solid rgba(0,255,255,0.3);
-            margin: 15px 0;
-        }
-
-        .note {
-            font-size: 12px;
-            color: #888;
-            margin-top: 10px;
-        }
-
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 8px 15px;
-            border: 1px solid #0ff;
-            border-radius: 8px;
-            color: #0ff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            background: #0ff;
-            color: black;
-            box-shadow: 0 0 10px #0ff;
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                max-width: 95%;
-                padding: 20px;
-            }
-
-            h2 {
-                font-size: 18px;
-            }
-
-            .value {
-                font-size: 16px;
-            }
-        }
-    </style>
+.value {
+    color:#ff00ff;
+    margin-bottom:10px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="page-wrapper">
+<div class="card">
 
-    <div class="card">
-        <h2>🚀 Smart Fuel Report</h2>
+<h2>🚀 Smart Report</h2>
+<p><?= $vehicle['brand'] ?> <?= $vehicle['model'] ?></p>
 
-        <p>Total Distance:</p>
-        <p class="value"><?= number_format($total_distance, 2) ?> km</p>
+<p>Total Distance</p>
+<p class="value"><?= number_format($total_distance,2) ?> km</p>
 
-        <p>Total Fuel Used:</p>
-        <p class="value"><?= number_format($total_liters, 2) ?> L</p>
+<p>Total Fuel</p>
+<p class="value"><?= number_format($total_liters,2) ?> L</p>
 
-        <p>Total Cost:</p>
-        <p class="value">₱<?= number_format($total_cost, 2) ?></p>
+<p>Total Cost</p>
+<p class="value">₱<?= number_format($total_cost,2) ?></p>
 
-        <hr>
+<hr>
 
-        <p>Fuel Efficiency (km/L):</p>
-        <p class="value"><?= number_format($km_per_liter, 2) ?></p>
+<p>Fuel Efficiency</p>
+<p class="value"><?= number_format($km_per_liter,2) ?> km/L</p>
 
-        <p>Cost per km:</p>
-        <p class="value">₱<?= number_format($cost_per_km, 4) ?></p>
+<p>Cost per km</p>
+<p class="value">₱<?= number_format($cost_per_km,4) ?></p>
 
-        <hr>
+<hr>
 
-        <p>📊 Predicted Monthly Distance:</p>
-        <p class="value"><?= number_format($predicted_distance, 2) ?> km</p>
+<p>📊 Predicted Distance</p>
+<p class="value"><?= number_format($predicted_distance,2) ?> km</p>
 
-        <p>💸 Predicted Monthly Expense:</p>
-        <p class="value">₱<?= number_format($predicted_cost, 2) ?></p>
+<p>💸 Predicted Expense</p>
+<p class="value">₱<?= number_format($predicted_cost,2) ?></p>
 
-        <p class="note">
-            Accuracy: <?= number_format($accuracy, 1) ?>% (based on <?= $days_logged ?> days logged)
-        </p>
+<p style="font-size:12px;color:#888;">
+Accuracy: <?= number_format($accuracy,1) ?>% (<?= $days_logged ?> days logged)
+</p>
 
-        <a href="dashboard.php">⬅ Back to Dashboard</a>
-    </div>
+<a href="dashboard.php?vehicle_id=<?= $vehicle_id ?>">⬅ Back</a>
 
 </div>
 

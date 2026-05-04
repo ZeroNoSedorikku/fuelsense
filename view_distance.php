@@ -7,12 +7,51 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$vehicle_id = $_GET['vehicle_id'] ?? null;
 
-$result = pg_query_params(
-    $conn,
-    "SELECT * FROM distance_logs WHERE user_id = $1 ORDER BY date DESC",
-    [$user_id]
-);
+if (!$vehicle_id) {
+    exit("No vehicle selected");
+}
+
+// =====================
+// VEHICLE INFO
+// =====================
+$vehicle_query = "
+    SELECT brand, model
+    FROM vehicles
+    WHERE vehicle_id = $1 AND user_id = $2
+";
+
+$vehicle_result = pg_query_params($conn, $vehicle_query, [$vehicle_id, $user_id]);
+$vehicle = pg_fetch_assoc($vehicle_result);
+
+if (!$vehicle) {
+    exit("Invalid vehicle");
+}
+
+// =====================
+// DISTANCE LOGS
+// =====================
+$query = "
+    SELECT *
+    FROM distance_logs
+    WHERE user_id = $1 AND vehicle_id = $2
+    ORDER BY date DESC
+";
+
+$result = pg_query_params($conn, $query, [$user_id, $vehicle_id]);
+
+// =====================
+// TOTAL DISTANCE
+// =====================
+$total_query = "
+    SELECT COALESCE(SUM(distance_km), 0) AS total
+    FROM distance_logs
+    WHERE user_id = $1 AND vehicle_id = $2
+";
+
+$total_result = pg_query_params($conn, $total_query, [$user_id, $vehicle_id]);
+$total_data = pg_fetch_assoc($total_result);
 ?>
 
 <!DOCTYPE html>
@@ -22,33 +61,11 @@ $result = pg_query_params(
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000);
+            font-family: Arial;
+            background: #000;
             color: white;
         }
 
@@ -56,62 +73,54 @@ $result = pg_query_params(
             text-align: center;
             padding: 20px;
             border-bottom: 2px solid #0ff;
-            box-shadow: 0 0 15px #0ff;
         }
 
         .header h2 {
             margin: 0;
             color: #0ff;
-            text-shadow: 0 0 10px #0ff;
         }
 
         .container {
             padding: 15px;
         }
 
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
+            min-width: 500px;
             border-collapse: collapse;
-            background: rgba(10,10,10,0.9);
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px #0ff;
+            background: #111;
         }
 
         th, td {
             padding: 10px;
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         th {
-            color: #ff00ff;
-            border-bottom: 1px solid #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
-        }
-
-        td {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #0ff;
+            border-bottom: 1px solid #0ff;
         }
 
         tr:hover {
-            background: rgba(255, 0, 255, 0.1);
-            box-shadow: 0 0 10px #ff00ff inset;
+            background: #222;
         }
 
         .delete-btn {
-            color: #ff004c;
+            color: red;
             text-decoration: none;
-            border: 1px solid #ff004c;
-            padding: 6px 10px;
-            border-radius: 6px;
-            transition: 0.3s;
-            font-size: 12px;
+            border: 1px solid red;
+            padding: 5px 8px;
+            border-radius: 5px;
         }
 
         .delete-btn:hover {
-            background: #ff004c;
+            background: red;
             color: black;
-            box-shadow: 0 0 10px #ff004c;
         }
 
         .empty {
@@ -121,8 +130,8 @@ $result = pg_query_params(
         }
 
         .back {
-            margin-top: 20px;
             text-align: center;
+            margin-top: 20px;
         }
 
         .back a {
@@ -132,28 +141,34 @@ $result = pg_query_params(
             border-radius: 8px;
             color: #0ff;
             text-decoration: none;
-            transition: 0.3s;
         }
 
         .back a:hover {
             background: #0ff;
             color: black;
-            box-shadow: 0 0 15px #0ff;
         }
-
     </style>
 </head>
+
 <body>
 
 <div class="header">
-    <h2>📏 Your Distance Logs</h2>
+    <h2>📏 Distance Logs</h2>
+
+    <p style="color:#ff00ff;">
+        <?= htmlspecialchars($vehicle['brand']) ?> <?= htmlspecialchars($vehicle['model']) ?>
+    </p>
+
+    <p style="color:#0ff;">
+        Total: <?= number_format($total_data['total'], 2) ?> km
+    </p>
 </div>
 
 <div class="container">
 
-<div style="overflow-x:auto;">
-    <table>
+<div class="table-wrapper">
 <table>
+
 <tr>
     <th>Date</th>
     <th>Distance (km)</th>
@@ -169,7 +184,7 @@ $result = pg_query_params(
         <td><?= htmlspecialchars($row['mode']) ?></td>
         <td>
             <a class="delete-btn"
-               href="delete_distance.php?id=<?= $row['id'] ?>"
+               href="delete_distance.php?id=<?= $row['distance_id'] ?>"
                onclick="return confirm('⚠ Delete this record?')">
                Delete
             </a>
@@ -183,10 +198,10 @@ $result = pg_query_params(
 <?php endif; ?>
 
 </table>
-    </table>
 </div>
+
 <div class="back">
-    <a href="dashboard.php">⬅ Back to Dashboard</a>
+    <a href="dashboard.php?vehicle_id=<?= $vehicle_id ?>">⬅ Back to Dashboard</a>
 </div>
 
 </div>

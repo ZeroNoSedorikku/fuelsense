@@ -7,189 +7,144 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$vehicle_id = $_GET['vehicle_id'] ?? null;
 
-$result = pg_query_params(
-    $conn,
-    "SELECT * FROM fuel_logs WHERE user_id = $1 ORDER BY date DESC",
-    [$user_id]
-);
+if (!$vehicle_id) {
+    exit("No vehicle selected");
+}
+
+// Get vehicle info
+$vehicle_query = "
+    SELECT brand, model
+    FROM vehicles
+    WHERE vehicle_id = $1 AND user_id = $2
+";
+
+$vehicle_result = pg_query_params($conn, $vehicle_query, [$vehicle_id, $user_id]);
+$vehicle = pg_fetch_assoc($vehicle_result);
+
+if (!$vehicle) {
+    exit("Invalid vehicle");
+}
+
+// Fuel logs (filtered)
+$query = "
+    SELECT *
+    FROM fuel_logs
+    WHERE user_id = $1 AND vehicle_id = $2
+    ORDER BY date DESC
+";
+
+$result = pg_query_params($conn, $query, [$user_id, $vehicle_id]);
+
+// Total fuel + cost
+$total_query = "
+    SELECT 
+        COALESCE(SUM(liters),0) AS total_liters,
+        COALESCE(SUM(cost),0) AS total_cost
+    FROM fuel_logs
+    WHERE user_id = $1 AND vehicle_id = $2
+";
+
+$total_result = pg_query_params($conn, $total_query, [$user_id, $vehicle_id]);
+$total_data = pg_fetch_assoc($total_result);
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fuel Logs - FuelSense</title>
+<title>Fuel Logs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-
-    <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background:#000;
+    color:#fff;
 }
-        body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000);
-            color: white;
-        }
 
-        .header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px solid #0ff;
-            box-shadow: 0 0 15px #0ff;
-        }
+.header {
+    text-align:center;
+    padding:20px;
+    border-bottom:2px solid #0ff;
+}
 
-        .header h2 {
-            margin: 0;
-            color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-        }
+.container {
+    padding:15px;
+}
 
-        .container {
-            padding: 15px;
-        }
+.table-wrapper {
+    overflow-x:auto;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(10,10,10,0.9);
-            border: 1px solid #0ff;
-            box-shadow: 0 0 20px #0ff;
-        }
+table {
+    width:100%;
+    min-width:500px;
+    border-collapse: collapse;
+}
 
-        th, td {
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
-        }
+th, td {
+    padding:10px;
+    text-align:center;
+}
 
-        th {
-            color: #ff00ff;
-            border-bottom: 1px solid #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
-        }
+th {
+    color:#0ff;
+}
 
-        td {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+tr:hover {
+    background:#111;
+}
 
-        tr:hover {
-            background: rgba(255, 0, 255, 0.1);
-            box-shadow: 0 0 10px #ff00ff inset;
-        }
-
-        .delete-btn {
-            color: #ff004c;
-            text-decoration: none;
-            border: 1px solid #ff004c;
-            padding: 6px 10px;
-            border-radius: 6px;
-            transition: 0.3s;
-            font-size: 12px;
-        }
-
-        .delete-btn:hover {
-            background: #ff004c;
-            color: black;
-            box-shadow: 0 0 10px #ff004c;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 20px;
-            color: #888;
-        }
-
-        .back {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .back a {
-            display: inline-block;
-            padding: 10px 15px;
-            border: 1px solid #0ff;
-            border-radius: 8px;
-            color: #0ff;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .back a:hover {
-            background: #0ff;
-            color: black;
-            box-shadow: 0 0 15px #0ff;
-        }
-
-    </style>
+.back {
+    text-align:center;
+    margin-top:20px;
+}
+</style>
 </head>
+
 <body>
 
 <div class="header">
-    <h2>⛽ Your Fuel Logs</h2>
+    <h2>⛽ Fuel Logs</h2>
+    <p><?= htmlspecialchars($vehicle['brand']) ?> <?= htmlspecialchars($vehicle['model']) ?></p>
+
+    <p style="color:#0ff;">
+        Total: <?= number_format($total_data['total_liters'],2) ?> L |
+        ₱<?= number_format($total_data['total_cost'],2) ?>
+    </p>
 </div>
 
 <div class="container">
-<div style="overflow-x:auto;">
-    <table>
+<div class="table-wrapper">
 <table>
+
 <tr>
     <th>Date</th>
     <th>Liters</th>
-    <th>Cost (₱)</th>
-    <th>Action</th>
+    <th>Cost</th>
 </tr>
 
 <?php if (pg_num_rows($result) > 0): ?>
     <?php while ($row = pg_fetch_assoc($result)): ?>
     <tr>
-        <td><?= htmlspecialchars($row['date']) ?></td>
-        <td><?= htmlspecialchars($row['liters']) ?></td>
-        <td>₱<?= htmlspecialchars($row['cost']) ?></td>
-        <td>
-            <a class="delete-btn"
-               href="delete_fuel.php?id=<?= $row['id'] ?>"
-               onclick="return confirm('⚠ Delete this record?')">
-               Delete
-            </a>
-        </td>
+        <td><?= $row['date'] ?></td>
+        <td><?= $row['liters'] ?></td>
+        <td>₱<?= $row['cost'] ?></td>
     </tr>
     <?php endwhile; ?>
 <?php else: ?>
-    <tr>
-        <td colspan="4" class="empty">No fuel records found</td>
-    </tr>
+<tr><td colspan="3">No records</td></tr>
 <?php endif; ?>
 
 </table>
-    </table>
 </div>
 
 <div class="back">
-    <a href="dashboard.php">⬅ Back to Dashboard</a>
+    <a href="dashboard.php?vehicle_id=<?= $vehicle_id ?>">⬅ Back</a>
 </div>
 
 </div>
-
 </body>
 </html>
