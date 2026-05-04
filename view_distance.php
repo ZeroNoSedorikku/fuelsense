@@ -62,78 +62,133 @@ $total_data = pg_fetch_assoc($total_result);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: #000;
-            color: white;
-        }
+       * {
+    box-sizing: border-box;
+}
 
-        .header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 2px solid #0ff;
-        }
+body {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: radial-gradient(circle at top, #0d0d0d, #000);
+    color: white;
+}
 
-        .header h2 {
-            margin: 0;
-            color: #0ff;
-        }
+/* ================= HEADER ================= */
+.header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #0ff;
+    box-shadow: 0 0 15px #0ff;
+}
 
-        .container {
-            padding: 15px;
-        }
+.header h2 {
+    margin: 0;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+}
 
-        .table-wrapper {
-            overflow-x: auto;
-        }
+.vehicle-name {
+    color: #ff00ff;
+    margin-top: 5px;
+    text-shadow: 0 0 10px #ff00ff;
+}
 
-        table {
-            width: 100%;
-            min-width: 400px;
-            border-collapse: collapse;
-            background: #111;
-        }
+.total {
+    color: #0ff;
+    margin-top: 5px;
+}
 
-        th, td {
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
+/* ================= CONTAINER ================= */
+.container {
+    padding: 15px;
+}
 
-        th {
-            color: #0ff;
-            border-bottom: 1px solid #0ff;
-        }
+/* ================= TABLE ================= */
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 15px;
+}
 
-        tr:hover {
-            background: #222;
-        }
+table {
+    width: 100%;
+    min-width: 400px;
+    border-collapse: collapse;
+    background: rgba(10,10,10,0.9);
+    border: 1px solid #0ff;
+    box-shadow: 0 0 15px #0ff;
+}
 
-        .empty {
-            text-align: center;
-            padding: 20px;
-            color: #888;
-        }
+th, td {
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+}
 
-        .back {
-            text-align: center;
-            margin-top: 20px;
-        }
+th {
+    color: #ff00ff;
+    border-bottom: 1px solid #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+}
 
-        .back a {
-            display: inline-block;
-            padding: 10px 15px;
-            border: 1px solid #0ff;
-            border-radius: 8px;
-            color: #0ff;
-            text-decoration: none;
-        }
+td {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
 
-        .back a:hover {
-            background: #0ff;
-            color: black;
-        }
+tr:hover {
+    background: rgba(255, 0, 255, 0.1);
+}
+
+/* ================= EMPTY ================= */
+.empty {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+/* ================= BACK BUTTON ================= */
+.back {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back a {
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #0ff;
+    border-radius: 8px;
+    color: #0ff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.back a:hover {
+    background: #0ff;
+    color: black;
+    box-shadow: 0 0 10px #0ff;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .vehicle-name,
+    .total {
+        font-size: 13px;
+    }
+
+    th, td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .back a {
+        width: 100%;
+        display: block;
+    }
+}
     </style>
 </head>
 
@@ -142,11 +197,11 @@ $total_data = pg_fetch_assoc($total_result);
 <div class="header">
     <h2>📏 Distance Logs</h2>
 
-    <p style="color:#ff00ff;">
+    <p class="vehicle-name">
         <?= htmlspecialchars($vehicle['brand']) ?> <?= htmlspecialchars($vehicle['model']) ?>
     </p>
 
-    <p style="color:#0ff;">
+    <p class="total">
         Total: <?= number_format($total_data['total'], 2) ?> km
     </p>
 </div>

@@ -220,8 +220,8 @@ if (!$current_vehicle_id) {
 
 <!-- ================= VEHICLE SWITCHER ================= -->
 <div class="vehicle-switcher">
-<form method="GET" id="vehicleForm">
 
+<form method="GET" id="vehicleForm" style="display:inline-block;">
     <select name="vehicle_id" onchange="this.form.submit()" required>
 
         <?php while ($v = pg_fetch_assoc($vehicles)): ?>
@@ -232,10 +232,30 @@ if (!$current_vehicle_id) {
         <?php endwhile; ?>
 
     </select>
-
 </form>
-</div>
 
+<!-- ✅ DELETE BUTTON -->
+<?php if ($current_vehicle_id): ?>
+<form method="POST" action="delete_vehicle.php" 
+      onsubmit="return confirm('⚠ Delete this vehicle and ALL its data?');"
+      style="display:inline-block; margin-left:10px;">
+
+    <input type="hidden" name="vehicle_id" value="<?= $current_vehicle_id ?>">
+
+    <button type="submit" style="
+        border:1px solid red;
+        background:transparent;
+        color:red;
+        padding:8px 10px;
+        border-radius:6px;
+        cursor:pointer;
+    ">
+        ❌ Delete
+    </button>
+</form>
+<?php endif; ?>
+
+</div>
 <!-- ================= FEATURES ================= -->
 <div class="container">
 

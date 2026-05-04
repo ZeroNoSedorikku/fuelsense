@@ -57,49 +57,132 @@ $total_data = pg_fetch_assoc($total_result);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+* {
+    box-sizing: border-box;
+}
+
 body {
-    margin:0;
-    font-family: Arial;
-    background:#000;
-    color:#fff;
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: radial-gradient(circle at top, #0d0d0d, #000);
+    color: white;
 }
 
+/* ================= HEADER ================= */
 .header {
-    text-align:center;
-    padding:20px;
-    border-bottom:2px solid #0ff;
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #0ff;
+    box-shadow: 0 0 15px #0ff;
 }
 
+.header h2 {
+    margin: 0;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff;
+}
+
+.vehicle-name {
+    color: #ff00ff;
+    margin-top: 5px;
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+.total {
+    color: #0ff;
+    margin-top: 5px;
+}
+
+/* ================= CONTAINER ================= */
 .container {
-    padding:15px;
+    padding: 15px;
 }
 
+/* ================= TABLE ================= */
 .table-wrapper {
-    overflow-x:auto;
+    overflow-x: auto;
+    margin-top: 15px;
 }
 
 table {
-    width:100%;
-    min-width:500px;
+    width: 100%;
+    min-width: 400px;
     border-collapse: collapse;
+    background: rgba(10,10,10,0.9);
+    border: 1px solid #0ff;
+    box-shadow: 0 0 15px #0ff;
 }
 
 th, td {
-    padding:10px;
-    text-align:center;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
 }
 
 th {
-    color:#0ff;
+    color: #ff00ff;
+    border-bottom: 1px solid #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+td {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 tr:hover {
-    background:#111;
+    background: rgba(255, 0, 255, 0.1);
 }
 
+/* ================= EMPTY ================= */
+.empty {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+/* ================= BACK ================= */
 .back {
-    text-align:center;
-    margin-top:20px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back a {
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #0ff;
+    border-radius: 8px;
+    color: #0ff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.back a:hover {
+    background: #0ff;
+    color: black;
+    box-shadow: 0 0 10px #0ff;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+
+    .header h2 {
+        font-size: 18px;
+    }
+
+    .vehicle-name,
+    .total {
+        font-size: 13px;
+    }
+
+    th, td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .back a {
+        width: 100%;
+        display: block;
+    }
 }
 </style>
 </head>
@@ -108,9 +191,10 @@ tr:hover {
 
 <div class="header">
     <h2>⛽ Fuel Logs</h2>
-    <p><?= htmlspecialchars($vehicle['brand']) ?> <?= htmlspecialchars($vehicle['model']) ?></p>
-
-    <p style="color:#0ff;">
+    <p class="vehicle-name">
+    <?= htmlspecialchars($vehicle['brand']) ?> <?= htmlspecialchars($vehicle['model']) ?>
+    </p>
+    <p class="total">
         Total: <?= number_format($total_data['total_liters'],2) ?> L |
         ₱<?= number_format($total_data['total_cost'],2) ?>
     </p>
@@ -129,13 +213,13 @@ tr:hover {
 <?php if (pg_num_rows($result) > 0): ?>
     <?php while ($row = pg_fetch_assoc($result)): ?>
     <tr>
-        <td><?= $row['date'] ?></td>
-        <td><?= $row['liters'] ?></td>
-        <td>₱<?= $row['cost'] ?></td>
+        <td><?= htmlspecialchars($row['date']) ?></td>
+        <td><?= htmlspecialchars($row['liters']) ?></td>
+        <td>₱<?= htmlspecialchars($row['cost']) ?></td>
     </tr>
     <?php endwhile; ?>
 <?php else: ?>
-<tr><td colspan="3">No records</td></tr>
+<tr><td colspan="3" class="empty">No fuel records found</td></tr>
 <?php endif; ?>
 
 </table>
