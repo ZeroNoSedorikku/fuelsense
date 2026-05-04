@@ -33,7 +33,7 @@ if (!$vehicle) {
 // DISTANCE LOGS
 // =====================
 $query = "
-    SELECT *
+    SELECT date, distance_km, mode
     FROM distance_logs
     WHERE user_id = $1 AND vehicle_id = $2
     ORDER BY date DESC
@@ -90,7 +90,7 @@ $total_data = pg_fetch_assoc($total_result);
 
         table {
             width: 100%;
-            min-width: 500px;
+            min-width: 400px;
             border-collapse: collapse;
             background: #111;
         }
@@ -108,19 +108,6 @@ $total_data = pg_fetch_assoc($total_result);
 
         tr:hover {
             background: #222;
-        }
-
-        .delete-btn {
-            color: red;
-            text-decoration: none;
-            border: 1px solid red;
-            padding: 5px 8px;
-            border-radius: 5px;
-        }
-
-        .delete-btn:hover {
-            background: red;
-            color: black;
         }
 
         .empty {
@@ -173,7 +160,6 @@ $total_data = pg_fetch_assoc($total_result);
     <th>Date</th>
     <th>Distance (km)</th>
     <th>Mode</th>
-    <th>Action</th>
 </tr>
 
 <?php if (pg_num_rows($result) > 0): ?>
@@ -182,18 +168,11 @@ $total_data = pg_fetch_assoc($total_result);
         <td><?= htmlspecialchars($row['date']) ?></td>
         <td><?= htmlspecialchars($row['distance_km']) ?></td>
         <td><?= htmlspecialchars($row['mode']) ?></td>
-        <td>
-            <a class="delete-btn"
-               href="delete_distance.php?id=<?= $row['distance_id'] ?>"
-               onclick="return confirm('⚠ Delete this record?')">
-               Delete
-            </a>
-        </td>
     </tr>
     <?php endwhile; ?>
 <?php else: ?>
     <tr>
-        <td colspan="4" class="empty">No distance records found</td>
+        <td colspan="3" class="empty">No distance records found</td>
     </tr>
 <?php endif; ?>
 

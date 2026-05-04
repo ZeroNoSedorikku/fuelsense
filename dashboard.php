@@ -40,7 +40,7 @@ $vehicles = pg_query_params(
 ===================== */
 $current_vehicle_id = $_GET['vehicle_id'] ?? null;
 
-// Auto-select first vehicle if none selected
+// Auto-select first vehicle
 if (!$current_vehicle_id) {
     $default = pg_query_params(
         $conn,
@@ -80,12 +80,35 @@ if (!$current_vehicle_id) {
             padding: 20px;
             border-bottom: 2px solid #0ff;
             box-shadow: 0 0 15px #0ff;
+            position: relative;
         }
 
         .header h2 {
             margin: 0;
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
+        }
+
+        /* LOGOUT BUTTON */
+        .logout {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+
+        .logout a {
+            border: 1px solid red;
+            padding: 6px 10px;
+            color: red;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .logout a:hover {
+            background: red;
+            color: black;
+            box-shadow: 0 0 10px red;
         }
 
         .add-vehicle {
@@ -126,18 +149,24 @@ if (!$current_vehicle_id) {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             padding: 20px;
         }
 
         .card {
             border: 1px solid #0ff;
             padding: 20px;
-            border-radius: 10px;
-            width: 200px;
+            border-radius: 12px;
+            width: 220px;
             text-align: center;
-            background: rgba(10,10,10,0.7);
-            box-shadow: 0 0 10px #0ff;
+            background: rgba(10,10,10,0.8);
+            box-shadow: 0 0 15px #0ff;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px #0ff;
         }
 
         .card h3 {
@@ -162,6 +191,17 @@ if (!$current_vehicle_id) {
             box-shadow: 0 0 10px #0ff;
         }
 
+        /* MOBILE */
+        @media (max-width: 600px) {
+            .card {
+                width: 90%;
+            }
+
+            .logout {
+                top: 10px;
+                right: 10px;
+            }
+        }
     </style>
 </head>
 
@@ -170,6 +210,11 @@ if (!$current_vehicle_id) {
 <!-- ================= HEADER ================= -->
 <div class="header">
     <h2>🚀 FuelSense Dashboard</h2>
+
+    <div class="logout">
+        <a href="logout.php">Logout</a>
+    </div>
+
     <a href="add_vehicle.php" class="add-vehicle">➕ Add Vehicle</a>
 </div>
 
@@ -177,7 +222,7 @@ if (!$current_vehicle_id) {
 <div class="vehicle-switcher">
 <form method="GET" id="vehicleForm">
 
-    <select name="vehicle_id" onchange="document.getElementById('vehicleForm').submit()" required>
+    <select name="vehicle_id" onchange="this.form.submit()" required>
 
         <?php while ($v = pg_fetch_assoc($vehicles)): ?>
             <option value="<?= $v['vehicle_id'] ?>"
