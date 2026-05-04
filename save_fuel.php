@@ -2,42 +2,28 @@
 session_start();
 include 'db.php';
 
-// Protect page
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+if (!isset($_SESSION['user_id'])) exit("Access denied");
 
 $user_id = $_SESSION['user_id'];
+$vehicle_id = $_POST['vehicle_id'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$date = $_POST['date'];
+$liters = (float) $_POST['liters'];
+$cost = (float) $_POST['cost'];
 
-    $date = $_POST['date'];
-    $liters = (float) $_POST['liters'];
-    $cost = (float) $_POST['cost'];
+if (!$vehicle_id) exit("Select vehicle");
 
-    // Validation
-    if (empty($date) || empty($liters) || empty($cost)) {
-        echo "All fields are required!";
-        exit();
-    }
+$query = "INSERT INTO fuel_logs (user_id, vehicle_id, date, liters, cost)
+          VALUES ($1, $2, $3, $4, $5)";
 
-    // Secure query
-    $query = "INSERT INTO fuel_logs (user_id, date, liters, cost)
-              VALUES ($1, $2, $3, $4)";
+pg_query_params($conn, $query, [
+    $user_id,
+    $vehicle_id,
+    $date,
+    $liters,
+    $cost
+]);
 
-    $result = pg_query_params($conn, $query, [
-        $user_id,
-        $date,
-        $liters,
-        $cost
-    ]);
-
-    if ($result) {
-        header("Location: fuel_form.php?success=1");
-        exit();
-    } else {
-        echo "Error saving fuel!";
-    }
-}
+header("Location: view_fuel.php?vehicle_id=$vehicle_id");
+exit();
 ?>

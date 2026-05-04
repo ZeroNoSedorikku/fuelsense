@@ -1,192 +1,164 @@
 <?php
 session_start();
+include 'db.php';
 
+// Protect page
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// =====================
+// GET VEHICLES
+// =====================
+$vehicles = pg_query_params($conn,
+    "SELECT vehicle_id, brand, model FROM vehicles WHERE user_id = $1",
+    [$user_id]
+);
+
+// =====================
+// CURRENT VEHICLE
+// =====================
+$current_vehicle_id = $_GET['vehicle_id'] ?? null;
+
+// Auto-select first vehicle if none selected
+if (!$current_vehicle_id) {
+    $default = pg_query_params($conn,
+        "SELECT vehicle_id FROM vehicles WHERE user_id = $1 LIMIT 1",
+        [$user_id]
+    );
+
+    $v = pg_fetch_assoc($default);
+
+    if ($v) {
+        header("Location: dashboard.php?vehicle_id=" . $v['vehicle_id']);
+        exit();
+    }
 }
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FuelSense Dashboard</title>
+    <title>Dashboard - FuelSense</title>
 
-    <!-- Mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
         body {
             margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle at top, #0d0d0d, #000);
+            font-family: Arial;
+            background: #000;
             color: white;
-
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
         }
 
-        .page-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-        }
-
-        /* HEADER */
         .header {
             text-align: center;
             padding: 20px;
-            background: rgba(0,0,0,0.6);
             border-bottom: 2px solid #0ff;
-            box-shadow: 0 0 20px #0ff;
-            border-radius: 10px;
         }
 
         .header h2 {
             margin: 0;
             color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-            font-size: 22px;
         }
 
-        .header p {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #ff00ff;
-        }
-
-        .logout {
-            margin-top: 10px;
-        }
-
-        .logout a {
-            display: inline-block;
-            padding: 6px 12px;
-            border: 1px solid #ff00ff;
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-size: 12px;
-        }
-
-        .logout a:hover {
-            background: #ff00ff;
-            color: black;
-        }
-
-        /* CONTAINER */
-        .container {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        /* CARDS */
-        .card {
-            background: rgba(10,10,10,0.85);
-            border: 1px solid #0ff;
-            border-radius: 15px;
-            padding: 20px;
-            width: 100%;
-            max-width: 280px;
+        .vehicle-switcher {
             text-align: center;
-            box-shadow: 0 0 15px #0ff;
-            flex: 1 1 260px;
-            transition: 0.3s;
+            margin: 20px;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 25px #ff00ff;
-            border-color: #ff00ff;
+        select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #0ff;
+            background: black;
+            color: white;
         }
 
-        .card h3 {
-            margin-bottom: 15px;
-            color: #0ff;
-            text-shadow: 0 0 10px #0ff;
-            font-size: 16px;
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .card {
+            border: 1px solid #0ff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            text-align: center;
         }
 
         .card a {
             display: block;
-            padding: 10px;
-            margin: 8px 0;
-            color: #fff;
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #0ff;
+            color: #0ff;
             text-decoration: none;
-            border: 1px solid #ff00ff;
-            border-radius: 8px;
-            background: transparent;
-            font-size: 13px;
-            transition: 0.3s;
+            border-radius: 6px;
         }
 
         .card a:hover {
-            background: #ff00ff;
+            background: #0ff;
             color: black;
-            box-shadow: 0 0 10px #ff00ff;
-        }
-
-        /* MOBILE FIX */
-        @media (max-width: 600px) {
-            .page-wrapper {
-                padding: 15px;
-            }
-
-            .header h2 {
-                font-size: 18px;
-            }
-
-            .card {
-                max-width: 95%;
-            }
         }
     </style>
 </head>
+
 <body>
 
-<div class="page-wrapper">
+<div class="header">
+    <h2>🚀 FuelSense Dashboard</h2>
+</div>
 
-    <div class="header">
-        <h2>⚡ FuelSense Dashboard ⚡</h2>
-        <p>Welcome, <?php echo $_SESSION['email'] ?? 'User'; ?></p>
+<!-- =====================
+     VEHICLE SWITCHER
+===================== -->
+<div class="vehicle-switcher">
+<form method="GET" id="vehicleForm">
 
-        <div class="logout">
-            <a href="logout.php" onclick="return confirm('Are you sure you want to logout?')">Logout</a>
-        </div>
+    <select name="vehicle_id" onchange="document.getElementById('vehicleForm').submit()" required>
+
+        <?php while ($v = pg_fetch_assoc($vehicles)): ?>
+            <option value="<?= $v['vehicle_id'] ?>"
+                <?= ($current_vehicle_id == $v['vehicle_id']) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
+            </option>
+        <?php endwhile; ?>
+
+    </select>
+
+</form>
+</div>
+
+<!-- =====================
+     FEATURES
+===================== -->
+<div class="container">
+
+    <div class="card">
+        <h3>Distance</h3>
+        <a href="add_distance.php?vehicle_id=<?= $current_vehicle_id ?>">Add Distance</a>
+        <a href="gps_track.php?vehicle_id=<?= $current_vehicle_id ?>">GPS Track</a>
+        <a href="view_distance.php?vehicle_id=<?= $current_vehicle_id ?>">View Logs</a>
     </div>
 
-    <div class="container">
+    <div class="card">
+        <h3>Fuel</h3>
+        <a href="fuel_form.php?vehicle_id=<?= $current_vehicle_id ?>">Add Fuel</a>
+        <a href="view_fuel.php?vehicle_id=<?= $current_vehicle_id ?>">View Logs</a>
+    </div>
 
-        <!-- Track Distance -->
-        <div class="card">
-            <h3>🚗 Track Distance</h3>
-            <a href="add_distance.php">Manual Input</a>
-            <a href="gps_track.php">GPS Tracking</a>
-            <a href="view_distance.php">View Distance Logs</a>
-        </div>
-
-        <!-- Fuel -->
-        <div class="card">
-            <h3>⛽ Input Fuel</h3>
-            <a href="fuel_form.php">Add Fuel</a>
-            <a href="view_fuel.php">View Fuel Logs</a>
-        </div>
-
-        <!-- Reports -->
-        <div class="card">
-            <h3>📊 View Reports</h3>
-            <a href="smart_report.php">Smart Expense Prediction</a>
-            <a href="maintenance_report.php">Maintenance Prediction</a>
-        </div>
-
+    <div class="card">
+        <h3>Reports</h3>
+        <a href="smart_report.php?vehicle_id=<?= $current_vehicle_id ?>">Smart Report</a>
+        <a href="maintenance_report.php?vehicle_id=<?= $current_vehicle_id ?>">Maintenance</a>
     </div>
 
 </div>

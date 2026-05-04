@@ -2,44 +2,28 @@
 session_start();
 include 'db.php';
 
-if (!isset($_SESSION['user_id'])) {
-    exit("Access denied");
-}
+if (!isset($_SESSION['user_id'])) exit("Access denied");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$user_id = $_SESSION['user_id'];
+$vehicle_id = $_POST['vehicle_id'];
 
-    $user_id = $_SESSION['user_id'];
+$date = $_POST['date'];
+$distance = (float) $_POST['distance'];
+$mode = $_POST['mode'] ?? 'Manual';
 
-    // safer inputs
-    $date = $_POST['date'] ?? date('Y-m-d');
-    $distance = isset($_POST['distance']) ? (float) $_POST['distance'] : 0;
-    $mode = $_POST['mode'] ?? 'Manual'; // supports GPS + Manual
+if (!$vehicle_id) exit("Select vehicle");
 
-    // validation
-    if (empty($date)) {
-        exit("Date is required");
-    }
+$query = "INSERT INTO distance_logs (user_id, vehicle_id, date, distance_km, mode)
+          VALUES ($1, $2, $3, $4, $5)";
 
-    if ($distance <= 0) {
-        exit("Invalid distance");
-    }
+pg_query_params($conn, $query, [
+    $user_id,
+    $vehicle_id,
+    $date,
+    $distance,
+    $mode
+]);
 
-    // insert
-    $query = "INSERT INTO distance_logs (user_id, date, distance_km, mode)
-              VALUES ($1, $2, $3, $4)";
-
-    $result = pg_query_params($conn, $query, [
-        $user_id,
-        $date,
-        $distance,
-        $mode
-    ]);
-
-    if (!$result) {
-        exit("Database error");
-    }
-
-    header("Location: view_distance.php");
-    exit();
-}
+header("Location: view_distance.php?vehicle_id=$vehicle_id");
+exit();
 ?>

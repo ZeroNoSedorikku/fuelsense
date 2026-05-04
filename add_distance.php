@@ -1,10 +1,18 @@
 <?php
 session_start();
+include 'db.php';
 
+// ✅ Check session FIRST
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+$user_id = $_SESSION['user_id'];
+
+// ✅ Get vehicles
+$vehicle_query = "SELECT * FROM vehicles WHERE user_id = $1";
+$vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
 ?>
 
 <!DOCTYPE html>
@@ -17,26 +25,6 @@ if (!isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @media (max-width: 600px) {
-
-    h2 {
-        font-size: 18px;
-    }
-
-    .card {
-        width: 100%;
-    }
-
-    .header h2 {
-        font-size: 18px;
-    }
-
-    .logout {
-        top: 5px;
-        right: 5px;
-    }
-
-}
         body {
             margin: 0;
             font-family: 'Orbitron', sans-serif;
@@ -61,14 +49,13 @@ if (!isset($_SESSION['user_id'])) {
         h2 {
             text-align: center;
             color: #0ff;
-            text-shadow: 0 0 10px #0ff;
         }
 
         label {
             color: #ff00ff;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -105,13 +92,24 @@ if (!isset($_SESSION['user_id'])) {
 <div class="form-container">
     <h2>🚗 Add Distance</h2>
 
-    <?php if (isset($_GET['success'])): ?>
-        <p style="color:#0f0; text-align:center;">✔ Distance added!</p>
-    <?php endif; ?>
+    <form method="POST" action="save_distance.php" 
+          onsubmit="return confirm('Save this distance?');">
 
-    <form method="POST" action="save_distance.php">
+        <!-- ✅ VEHICLE SELECT -->
+        <label>Select Vehicle</label>
+        <select name="vehicle_id" required>
+            <option value="">Select Vehicle</option>
+
+            <?php while ($v = pg_fetch_assoc($vehicle_result)): ?>
+                <option value="<?= $v['vehicle_id'] ?>">
+                    <?= htmlspecialchars($v['brand'] . ' ' . $v['model'] . ' (' . $v['cc'] . 'cc ' . $v['type'] . ')') ?>
+                </option>
+            <?php endwhile; ?>
+
+        </select>
+
         <label>Date</label>
-        <input type="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+        <input type="date" name="date" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
 
         <label>Distance (km)</label>
         <input type="number" name="distance" step="0.01" min="0" required>
