@@ -143,7 +143,10 @@ if (pg_num_rows($vehicle_result) == 0) {
 
         <!-- DATE -->
         <label>Date</label>
-        <input type="date" name="date" value="<?= date('Y-m-d') ?>" required>
+        <input type="date" name="date"
+                max="<?= date('Y-m-d') ?>"
+                value="<?= date('Y-m-d') ?>"
+                required>
 
         <!-- LITERS -->
         <label>Liters</label>

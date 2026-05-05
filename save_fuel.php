@@ -7,7 +7,13 @@ if (!isset($_SESSION['user_id'])) exit("Access denied");
 $user_id = $_SESSION['user_id'];
 $vehicle_id = $_POST['vehicle_id'] ?? null;
 
-$date = $_POST['date'];
+$date = $_POST['date'] ?? date('Y-m-d');
+
+// Prevent future date
+if ($date > date('Y-m-d')) {
+    header("Location: fuel_form.php?error=Future dates not allowed");
+    exit();
+}
 $liters = (float) $_POST['liters'];
 $cost = (float) $_POST['cost'];
 

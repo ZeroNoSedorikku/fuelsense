@@ -121,12 +121,18 @@ input, select {
     padding: 12px;
     margin-top: 6px;
     margin-bottom: 12px;
-    background: transparent;
+    background: #000;
     border: 1px solid #0ff;
     border-radius: 8px;
     color: white;
     outline: none;
     display: block;
+}
+
+/* ✅ FIXED DROPDOWN */
+select option {
+    background: #111;
+    color: #0ff;
 }
 
 button {
