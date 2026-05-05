@@ -49,21 +49,34 @@ $vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
         h2 {
             text-align: center;
             color: #0ff;
+            text-shadow: 0 0 10px #0ff;
         }
 
         label {
             color: #ff00ff;
         }
 
+        /* ✅ FIXED INPUT + SELECT */
         input, select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            background: transparent;
+            background: #000;
             border: 1px solid #0ff;
             border-radius: 8px;
-            color: white;
+            color: #fff;
             box-sizing: border-box;
+        }
+
+        /* ✅ FIXED DROPDOWN OPTIONS (IMPORTANT) */
+        select option {
+            background: #111;
+            color: #0ff;
+        }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 10px #0ff;
+            outline: none;
         }
 
         button {
@@ -79,11 +92,21 @@ $vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
         button:hover {
             background: #ff00ff;
             color: black;
+            box-shadow: 0 0 15px #ff00ff;
         }
 
         .back {
             text-align: center;
             margin-top: 15px;
+        }
+
+        .back a {
+            color: #0ff;
+            text-decoration: none;
+        }
+
+        .back a:hover {
+            text-shadow: 0 0 10px #0ff;
         }
     </style>
 </head>
@@ -109,7 +132,10 @@ $vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
         </select>
 
         <label>Date</label>
-        <input type="date" name="date" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+        <input type="date" name="date"
+               value="<?= date('Y-m-d') ?>"
+               max="<?= date('Y-m-d') ?>"
+               required>
 
         <label>Distance (km)</label>
         <input type="number" name="distance" step="0.01" min="0" required>
@@ -118,7 +144,7 @@ $vehicle_result = pg_query_params($conn, $vehicle_query, [$user_id]);
     </form>
 
     <div class="back">
-        <a href="dashboard.php" style="color:#0ff;">⬅ Back</a>
+        <a href="dashboard.php">⬅ Back</a>
     </div>
 </div>
 

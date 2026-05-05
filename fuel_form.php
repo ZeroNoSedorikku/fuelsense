@@ -104,6 +104,20 @@ if (pg_num_rows($vehicle_result) == 0) {
         .back a:hover {
             text-shadow: 0 0 10px #0ff;
         }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            background: #000;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+            color: white;
+        }
+
+        select option {
+            background: #111;
+            color: #0ff;
+        }
     </style>
 </head>
 <body>
