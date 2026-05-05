@@ -116,34 +116,39 @@
 <div class="register-box">
     <h2> Create Account</h2>
 
-    <form method="POST" action="process_register.php">
-        <label>Name</label>
-        <input type="text" name="name" required>
+    <form method="POST" action="process_register.php" onsubmit="return validateForm()">
 
-        <label>Email</label>
-        <input type="email" name="email" required>
+    <label>Name</label>
+    <input type="text" name="name" required>
 
-        <div style="position: relative; width: 100%;">
-    <label>Password</label>
+    <label>Email</label>
+    <input type="email" name="email" required>
 
-    <input type="password" name="password" id="password" required>
+    <!-- PASSWORD -->
+    <div style="position: relative;">
+        <label>Password</label>
+        <input type="password" name="password" id="password" required>
 
-    <span onclick="togglePassword()" 
-          style="
-            position: absolute;
-            right: 10px;
-            top: 38px;
-            cursor: pointer;
-            color: #0ff;
-            font-size: 14px;
-            user-select: none;
-          ">
-        👁
-    </span>
-</div>
+        <span onclick="togglePassword('password')" 
+              style="position:absolute; right:10px; top:38px; cursor:pointer; color:#0ff;">
+            👁
+        </span>
+    </div>
 
-        <button type="submit">Register</button>
-    </form>
+    <!-- CONFIRM PASSWORD -->
+    <div style="position: relative;">
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" id="confirm_password" required>
+
+        <span onclick="togglePassword('confirm_password')" 
+              style="position:absolute; right:10px; top:38px; cursor:pointer; color:#0ff;">
+            👁
+        </span>
+    </div>
+
+    <button type="submit">Register</button>
+
+</form>
 
     <div class="login">
         <p>Already have an account?</p>
@@ -151,14 +156,26 @@
     </div>
 </div>
 <script>
-function togglePassword() {
-    let pass = document.getElementById("password");
+function togglePassword(id) {
+    let input = document.getElementById(id);
+    input.type = (input.type === "password") ? "text" : "password";
+}
 
-    if (pass.type === "password") {
-        pass.type = "text";
-    } else {
-        pass.type = "password";
+function validateForm() {
+    let pass = document.getElementById("password").value;
+    let confirm = document.getElementById("confirm_password").value;
+
+    if (pass !== confirm) {
+        alert("❌ Passwords do not match!");
+        return false;
     }
+
+    if (pass.length < 6) {
+        alert("⚠ Password must be at least 6 characters");
+        return false;
+    }
+
+    return true;
 }
 </script>
 </body>

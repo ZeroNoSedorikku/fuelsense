@@ -83,22 +83,27 @@ body {
     font-family: 'Orbitron', sans-serif;
     background: radial-gradient(circle at top, #0d0d0d, #000);
     color: white;
+
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 15px;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 .container {
     background: rgba(10,10,10,0.9);
-    padding: 20px;
+    padding: 25px;
     border-radius: 15px;
     border: 1px solid #0ff;
     box-shadow: 0 0 20px #0ff;
     width: 90%;
     max-width: 400px;
 }
-
 h2 {
     text-align: center;
     color: #0ff;
@@ -108,16 +113,20 @@ label {
     display: block;
     margin-top: 10px;
     color: #ff00ff;
+    text-align: left;
 }
 
 input, select {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 12px;
     background: transparent;
     border: 1px solid #0ff;
     border-radius: 8px;
     color: white;
+    outline: none;
+    display: block;
 }
 
 button {
@@ -184,9 +193,6 @@ button:hover {
 <?php endif; ?>
 
 <form method="POST">
-<div class="back">
-    <a href="dashboard.php">⬅ Back to Dashboard</a>
-</div>
 <label>Type</label>
 <select name="type" required>
     <option value="">Select Type</option>
@@ -206,7 +212,9 @@ button:hover {
 <button type="submit">Save Vehicle</button>
 
 </form>
-
+<div class="back">
+    <a href="dashboard.php">⬅ Back to Dashboard</a>
+</div>
 </div>
 
 </body>

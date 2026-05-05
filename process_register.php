@@ -1,34 +1,67 @@
 <?php
+session_start();
 include 'db.php';
 
-$name = $_POST['name'];
-$email = $_POST['email'];
-$password = $_POST['password'];
+$name = $_POST['name'] ?? '';
+$email = $_POST['email'] ?? '';
+$password = $_POST['password'] ?? '';
+$confirm = $_POST['confirm_password'] ?? '';
 
-// Hash the password
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+/* ---------------- VALIDATION ---------------- */
 
-// Check if email already exists (SAFE)
-$check = pg_query_params($conn, "SELECT * FROM users WHERE email=$1", array($email));
+// check empty
+if (empty($name) || empty($email) || empty($password)) {
+    $_SESSION['error'] = "All fields are required!";
+    header("Location: register.php");
+    exit();
+}
+
+// password match
+if ($password !== $confirm) {
+    $_SESSION['error'] = "Passwords do not match!";
+    header("Location: register.php");
+    exit();
+}
+
+/* ---------------- CHECK EMAIL ---------------- */
+
+$check = pg_query_params(
+    $conn,
+    "SELECT user_id FROM users WHERE email = $1",
+    [$email]
+);
 
 if (pg_num_rows($check) > 0) {
-    $message = "❌ Email already registered!";
-    $success = false;
+    $_SESSION['error'] = "Email already exists!";
+    header("Location: register.php");
+    exit();
+}
+
+/* ---------------- HASH PASSWORD ---------------- */
+
+$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+/* ---------------- INSERT USER ---------------- */
+
+$query = "
+    INSERT INTO users (name, email, password, role)
+    VALUES ($1, $2, $3, 'user')
+";
+
+$result = pg_query_params(
+    $conn,
+    $query,
+    [$name, $email, $hashed_password]
+);
+
+if ($result) {
+    $_SESSION['success'] = "Registration successful!";
+    header("Location: login.php");
+    exit();
 } else {
-
-    // Insert user (SAFE)
-    $query = "INSERT INTO users (name, email, password, role)
-              VALUES ($1, $2, $3, 'user')";
-
-    $result = pg_query_params($conn, $query, array($name, $email, $hashed_password));
-
-    if ($result) {
-        $message = "✅ Registration successful!";
-        $success = true;
-    } else {
-        $message = "❌ Error during registration.";
-        $success = false;
-    }
+    $_SESSION['error'] = "Something went wrong.";
+    header("Location: register.php");
+    exit();
 }
 ?>
 
@@ -125,3 +158,25 @@ if (pg_num_rows($check) > 0) {
 
 </body>
 </html>
+
+$password = $_POST['password'];
+$confirm = $_POST['confirm_password'];
+
+if ($password !== $confirm) {
+    header("Location: register.php?error=Passwords do not match");
+    exit();
+}
+
+// hash password
+$hashed = password_hash($password, PASSWORD_DEFAULT);
+
+// prevent duplicate email
+$check = pg_query_params($conn,
+    "SELECT * FROM users WHERE email = $1",
+    [$_POST['email']]
+);
+
+if (pg_num_rows($check) > 0) {
+    header("Location: register.php?error=Email already exists");
+    exit();
+}
