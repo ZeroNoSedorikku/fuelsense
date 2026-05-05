@@ -7,9 +7,16 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
 }
 
 $query = "
-SELECT d.*, u.email 
+SELECT 
+    d.*,
+    u.email,
+    v.type,
+    v.brand,
+    v.model,
+    v.cc
 FROM distance_logs d
 JOIN users u ON d.user_id = u.user_id
+JOIN vehicles v ON d.vehicle_id = v.vehicle_id
 ORDER BY d.date DESC
 ";
 
@@ -133,22 +140,36 @@ $result = pg_query($conn, $query);
 
         <div class="table-wrapper">
             <table>
-                <tr>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Distance (km)</th>
-                    <th>Mode</th>
-                </tr>
+            <tr>
+                <th>User</th>
+                <th>Vehicle</th>
+                <th>Type</th>
+                <th>CC</th>
+                <th>Date</th>
+                <th>Distance (km)</th>
+                <th>Mode</th>
+            </tr>
 
-                <?php while ($row = pg_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['email']) ?></td>
-                    <td><?= htmlspecialchars($row['date']) ?></td>
-                    <td><?= htmlspecialchars($row['distance_km']) ?></td>
-                    <td><?= htmlspecialchars($row['mode']) ?></td>
-                </tr>
-                <?php endwhile; ?>
-            </table>
+            <?php while ($row = pg_fetch_assoc($result)): ?>
+            <tr>
+                <td><?= htmlspecialchars($row['email']) ?></td>
+
+                <td>
+                    <?= htmlspecialchars($row['brand'] . ' ' . $row['model']) ?>
+                </td>
+
+                <td><?= htmlspecialchars($row['type']) ?></td>
+
+                <td><?= htmlspecialchars($row['cc']) ?>cc</td>
+
+                <td><?= htmlspecialchars($row['date']) ?></td>
+
+                <td><?= htmlspecialchars($row['distance_km']) ?></td>
+
+                <td><?= htmlspecialchars($row['mode']) ?></td>
+            </tr>
+            <?php endwhile; ?>
+        </table>
         </div>
 
         <div class="back">

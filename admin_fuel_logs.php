@@ -7,8 +7,15 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
 }
 
 $query = "
-SELECT f.*, u.email 
+SELECT 
+    f.*, 
+    v.type,
+    v.brand,
+    v.model,
+    v.cc,
+    u.name AS user_name
 FROM fuel_logs f
+JOIN vehicles v ON f.vehicle_id = v.vehicle_id
 JOIN users u ON f.user_id = u.user_id
 ORDER BY f.date DESC
 ";
@@ -133,21 +140,27 @@ $result = pg_query($conn, $query);
 
         <div class="table-wrapper">
             <table>
-                <tr>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Liters</th>
-                    <th>Cost</th>
-                </tr>
+        <tr>
+            <th>User</th>
+            <th>Vehicle</th>
+            <th>Type</th>
+            <th>CC</th>
+            <th>Date</th>
+            <th>Liters</th>
+            <th>Cost</th>
+        </tr>
 
-                <?php while ($row = pg_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['email']) ?></td>
-                    <td><?= htmlspecialchars($row['date']) ?></td>
-                    <td><?= htmlspecialchars($row['liters']) ?></td>
-                    <td>₱<?= htmlspecialchars($row['cost']) ?></td>
-                </tr>
-                <?php endwhile; ?>
+        <?php while ($row = pg_fetch_assoc($result)): ?>
+        <tr>
+            <td><?= htmlspecialchars($row['user_name']) ?></td>
+            <td><?= htmlspecialchars($row['brand'] . ' ' . $row['model']) ?></td>
+            <td><?= htmlspecialchars($row['type']) ?></td>
+            <td><?= htmlspecialchars($row['cc']) ?>cc</td>
+            <td><?= htmlspecialchars($row['date']) ?></td>
+            <td><?= htmlspecialchars($row['liters']) ?> L</td>
+            <td>₱<?= htmlspecialchars($row['cost']) ?></td>
+        </tr>
+        <?php endwhile; ?>
             </table>
         </div>
 
