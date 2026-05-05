@@ -6,6 +6,8 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+$user_id = $_SESSION['user_id'];
 ?>
 
 <!DOCTYPE html>
@@ -43,6 +45,16 @@ if (!isset($_SESSION['user_id'])) {
         h2 {
             color: #0ff;
             text-shadow: 0 0 10px #0ff;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid #0ff;
+            color: white;
+            border-radius: 8px;
         }
 
         .distance-box {
@@ -93,10 +105,6 @@ if (!isset($_SESSION['user_id'])) {
             color: #ff00ff;
         }
 
-        .back {
-            margin-top: 15px;
-        }
-
         .back a {
             display: inline-block;
             padding: 8px 12px;
@@ -112,24 +120,48 @@ if (!isset($_SESSION['user_id'])) {
         }
     </style>
 </head>
+
 <body>
 
 <div class="tracker-box">
     <h2>🚗 GPS Distance Tracker</h2>
 
-    <button id="start">Start Tracking</button>
-    <button id="stop">Stop Tracking</button>
-
-    <div class="distance-box">
-        Distance: <span id="distance">0.00</span> km
-    </div>
-
-    <div class="status" id="status">Idle...</div>
-
+    <!-- FORM -->
     <form id="saveForm" method="POST" action="save_distance.php">
+
+        <!-- VEHICLE SELECT (THIS FIXES YOUR ERROR) -->
+        <label>Select Vehicle</label>
+        <select name="vehicle_id" id="vehicle_id" required>
+            <option value="">-- Select Vehicle --</option>
+
+            <?php
+            $vehicles = pg_query_params(
+                $conn,
+                "SELECT vehicle_id, brand, model FROM vehicles WHERE user_id = $1",
+                [$user_id]
+            );
+
+            while ($v = pg_fetch_assoc($vehicles)) {
+                echo "<option value='{$v['vehicle_id']}'>
+                        {$v['brand']} {$v['model']}
+                      </option>";
+            }
+            ?>
+        </select>
+
+        <button type="button" id="start">Start Tracking</button>
+        <button type="button" id="stop">Stop Tracking</button>
+
+        <div class="distance-box">
+            Distance: <span id="distance">0.00</span> km
+        </div>
+
+        <div class="status" id="status">Idle...</div>
+
         <input type="hidden" name="distance" id="finalDistance">
         <input type="hidden" name="date" id="date">
         <input type="hidden" name="mode" value="GPS">
+
     </form>
 
     <div class="back">
@@ -161,16 +193,22 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+// START
 document.getElementById("start").onclick = function () {
+
+    let vehicle = document.getElementById("vehicle_id").value;
+
+    if (!vehicle) {
+        alert("Please select a vehicle first!");
+        return;
+    }
+
     if (!navigator.geolocation) {
         alert("GPS not supported.");
         return;
     }
 
-    if (isTracking) {
-        alert("Already tracking!");
-        return;
-    }
+    if (isTracking) return;
 
     totalDistance = 0;
     lastPosition = null;
@@ -210,28 +248,27 @@ document.getElementById("start").onclick = function () {
     });
 };
 
+// STOP
 document.getElementById("stop").onclick = function () {
-    if (!isTracking) {
-        alert("Start tracking first!");
-        return;
-    }
+
+    if (!isTracking) return;
 
     navigator.geolocation.clearWatch(watchId);
 
-    watchId = null;
     isTracking = false;
 
     document.getElementById("status").innerText = "Tracking stopped ✔";
 
-    // prevent saving useless data
     if (totalDistance <= 0) {
         alert("No distance recorded!");
         return;
     }
 
     if (confirm("Save this distance?")) {
+
         document.getElementById("finalDistance").value = totalDistance.toFixed(2);
-        document.getElementById("date").value = new Date().toISOString().split('T')[0];
+        document.getElementById("date").value =
+            new Date().toISOString().split('T')[0];
 
         document.getElementById("saveForm").submit();
     }
