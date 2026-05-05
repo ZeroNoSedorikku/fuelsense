@@ -74,7 +74,6 @@ if (!$current_vehicle_id) {
             color: white;
         }
 
-        /* ================= HEADER ================= */
         .header {
             text-align: center;
             padding: 20px;
@@ -89,7 +88,6 @@ if (!$current_vehicle_id) {
             text-shadow: 0 0 10px #0ff;
         }
 
-        /* LOGOUT BUTTON */
         .logout {
             position: absolute;
             right: 20px;
@@ -119,17 +117,13 @@ if (!$current_vehicle_id) {
             color: #ff00ff;
             text-decoration: none;
             border-radius: 6px;
-            transition: 0.3s;
-            font-size: 14px;
         }
 
         .add-vehicle:hover {
             background: #ff00ff;
             color: black;
-            box-shadow: 0 0 15px #ff00ff;
         }
 
-        /* ================= VEHICLE SWITCHER ================= */
         .vehicle-switcher {
             text-align: center;
             margin: 20px;
@@ -141,10 +135,31 @@ if (!$current_vehicle_id) {
             border: 1px solid #0ff;
             background: black;
             color: white;
-            font-family: 'Orbitron', sans-serif;
         }
 
-        /* ================= CARDS ================= */
+        /* NEW: vehicle list with delete */
+        .vehicle-list {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .vehicle-item {
+            margin: 5px 0;
+        }
+
+        .vehicle-item a {
+            color: red;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+
+        .vehicle-item a:hover {
+            color: black;
+            background: red;
+            padding: 2px 6px;
+            border-radius: 5px;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -161,17 +176,10 @@ if (!$current_vehicle_id) {
             text-align: center;
             background: rgba(10,10,10,0.8);
             box-shadow: 0 0 15px #0ff;
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 25px #0ff;
         }
 
         .card h3 {
             color: #ff00ff;
-            text-shadow: 0 0 10px #ff00ff;
         }
 
         .card a {
@@ -182,32 +190,17 @@ if (!$current_vehicle_id) {
             color: #0ff;
             text-decoration: none;
             border-radius: 6px;
-            transition: 0.3s;
         }
 
         .card a:hover {
             background: #0ff;
             color: black;
-            box-shadow: 0 0 10px #0ff;
-        }
-
-        /* MOBILE */
-        @media (max-width: 600px) {
-            .card {
-                width: 90%;
-            }
-
-            .logout {
-                top: 10px;
-                right: 10px;
-            }
         }
     </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="header">
     <h2>🚀 FuelSense Dashboard</h2>
 
@@ -218,45 +211,40 @@ if (!$current_vehicle_id) {
     <a href="add_vehicle.php" class="add-vehicle">➕ Add Vehicle</a>
 </div>
 
-<!-- ================= VEHICLE SWITCHER ================= -->
+<!-- VEHICLE SWITCH -->
 <div class="vehicle-switcher">
-
-<form method="GET" id="vehicleForm" style="display:inline-block;">
-    <select name="vehicle_id" onchange="this.form.submit()" required>
-
-        <?php while ($v = pg_fetch_assoc($vehicles)): ?>
+<form method="GET">
+    <select name="vehicle_id" onchange="this.form.submit()">
+        <?php 
+        pg_result_seek($vehicles, 0); // reset pointer
+        while ($v = pg_fetch_assoc($vehicles)): ?>
             <option value="<?= $v['vehicle_id'] ?>"
                 <?= ($current_vehicle_id == $v['vehicle_id']) ? 'selected' : '' ?>>
                 <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
             </option>
         <?php endwhile; ?>
-
     </select>
 </form>
 
-<!-- ✅ DELETE BUTTON -->
-<?php if ($current_vehicle_id): ?>
-<form method="POST" action="delete_vehicle.php" 
-      onsubmit="return confirm('⚠ Delete this vehicle and ALL its data?');"
-      style="display:inline-block; margin-left:10px;">
+<!-- ✅ VEHICLE DELETE LIST -->
+<div class="vehicle-list">
+<?php 
+pg_result_seek($vehicles, 0); // reset again
+while ($v = pg_fetch_assoc($vehicles)): ?>
+    <div class="vehicle-item">
+        <?= htmlspecialchars($v['brand']) ?> <?= htmlspecialchars($v['model']) ?>
 
-    <input type="hidden" name="vehicle_id" value="<?= $current_vehicle_id ?>">
-
-    <button type="submit" style="
-        border:1px solid red;
-        background:transparent;
-        color:red;
-        padding:8px 10px;
-        border-radius:6px;
-        cursor:pointer;
-    ">
-        ❌ Delete
-    </button>
-</form>
-<?php endif; ?>
+        <a href="delete_vehicle.php?vehicle_id=<?= $v['vehicle_id'] ?>"
+           onclick="return confirm('Delete this vehicle and ALL its data?')">
+           ❌
+        </a>
+    </div>
+<?php endwhile; ?>
+</div>
 
 </div>
-<!-- ================= FEATURES ================= -->
+
+<!-- FEATURES -->
 <div class="container">
 
     <div class="card">
